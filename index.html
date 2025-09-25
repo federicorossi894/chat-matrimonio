@@ -72,6 +72,111 @@
     .msgPhoto{max-width:62vw;height:auto;border-radius:14px;display:block;border:1px solid #eee;background:#fff}
     /* Helpers */
     .hidden{display:none !important}
+    
+    /* ————— Wedding Theme (verde salvia / panna) ————— */
+.theme-wedding{
+  --bg:#eef3ef;            /* sfondo generale */
+  --card:#fffdf9;          /* card chiara “panna” */
+  --text:#203127;          /* testo scuro ma morbido */
+  --muted:#6e7b72;
+  --pri:#6f8f7a;           /* bottone principale verde salvia */
+  --priText:#fff;
+  --soft:#e8efe9;          /* chip/tab soft */
+  --chip:#ecf2ee;
+  --accent:#6f8f7a;
+  --shadow:0 10px 28px rgba(49,77,63,.10);
+  --radius:24px;           /* angoli più rotondi */
+  --radiusSm:14px;
+}
+
+/* leggero pattern foliage sullo sfondo */
+.theme-wedding body{
+  background:
+    radial-gradient(1200px 600px at 80% -200px, rgba(111,143,122,.12), transparent 60%),
+    radial-gradient(900px 500px at -200px 80%, rgba(111,143,122,.10), transparent 60%),
+    var(--bg);
+}
+
+/* card e pannelli “soft” */
+.theme-wedding .card,
+.theme-wedding .panel,
+.theme-wedding .dmList{
+  border-radius:var(--radius);
+  border:1px solid rgba(111,143,122,.12);
+  box-shadow:var(--shadow);
+  background:var(--card);
+}
+
+/* tab stile pill */
+.theme-wedding .tab{ background:var(--soft); color:#2a3a31 }
+.theme-wedding .tab.active{ background:var(--pri); color:var(--priText) }
+
+/* bottoni */
+.theme-wedding .btn.primary{ background:var(--pri); color:var(--priText) }
+.theme-wedding .btn.soft{ background:var(--soft) }
+.theme-wedding .iconBtn{ background:var(--soft) }
+
+/* avatar: cerchio con sottile bordo caldo */
+.theme-wedding .avatar{
+  border:1px solid rgba(111,143,122,.18);
+  background:#f5f7f5;
+}
+
+/* bubble più “cartolina” */
+.theme-wedding .bubble{
+  background:#f5f8f6;
+  border:1px solid rgba(111,143,122,.14);
+  border-radius:18px;
+}
+
+/* immagine nei messaggi: cornice */
+.theme-wedding .msgPhoto{
+  border-radius:18px;
+  border:1px solid rgba(111,143,122,.18);
+  box-shadow:0 8px 20px rgba(49,77,63,.10);
+}
+
+/* input arrotondati */
+.theme-wedding .inputRow input{
+  border:1px solid rgba(111,143,122,.22);
+  background:#fff;
+}
+
+/* status rows (profilo) evidenziate */
+.theme-wedding .statusRow.active{
+  outline:2px solid rgba(111,143,122,.6);
+  background:#f1f6f3;
+}
+
+/* piccoli badge “single/engaged” (se li userai) */
+.theme-wedding .chip, .theme-wedding .small-badge{
+  background:#ecf2ee; color:#2a3a31; border:1px solid rgba(111,143,122,.18);
+}
+
+/* decoro floreale negli angoli dei pannelli principali */
+.theme-wedding #tableView > .row:first-child,
+.theme-wedding #dmChatView > .row:first-child,
+.theme-wedding #dmListView h3{
+  position:relative;
+}
+.theme-wedding #tableView > .row:first-child::after,
+.theme-wedding #dmChatView > .row:first-child::after{
+  content:"";
+  position:absolute; right:8px; top:-8px; width:70px; height:70px; opacity:.75;
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>\
+<g fill='none' stroke='rgba(111,143,122,.45)' stroke-width='2'>\
+<path d='M60 20c-8 12-14 14-24 22M90 36c-10 5-16 15-26 18'/>\
+</g>\
+<g fill='#f6e9e4' stroke='rgba(172,120,112,.35)' stroke-width='1.5'>\
+<circle cx='94' cy='26' r='10'/>\
+<circle cx='28' cy='28' r='9'/>\
+</g>\
+</svg>");
+  background-size:contain; background-repeat:no-repeat;
+  pointer-events:none;
+}
+    
   </style>
 </head>
 <body>
@@ -946,6 +1051,7 @@ async function doSearch(mode){
 
 /* ========= START ========= */
 show('home');
+document.body.classList.add('theme-wedding');
 </script>
 </body>
 </html>
