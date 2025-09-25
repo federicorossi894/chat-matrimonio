@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340">
+  <defs>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" />
+      <feOffset dy="1" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/><feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- rametti eucalipto -->
+  <g filter="url(#s)">
+    <path d="M18 170 C40 120, 90 80, 150 62" stroke="#8aa79a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M24 210 C60 165, 115 130, 180 112" stroke="#8aa79a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <!-- foglie -->
+    <g fill="#a9c1b5">
+      <ellipse cx="52" cy="144" rx="14" ry="10" transform="rotate(-20 52 144)"/>
+      <ellipse cx="78" cy="120" rx="16" ry="12" transform="rotate(8 78 120)"/>
+      <ellipse cx="100" cy="106" rx="13" ry="10" transform="rotate(-15 100 106)"/>
+      <ellipse cx="66" cy="186" rx="15" ry="11" transform="rotate(-28 66 186)"/>
+      <ellipse cx="92" cy="170" rx="17" ry="12" transform="rotate(10 92 170)"/>
+      <ellipse cx="126" cy="154" rx="14" ry="10" transform="rotate(-12 126 154)"/>
+    </g>
+    <!-- venature -->
+    <g stroke="#7b998b" stroke-width="1.2" fill="none" opacity=".85">
+      <path d="M40 144 l24 -10"/>
+      <path d="M76 118 l18 4"/>
+      <path d="M92 168 l22 -6"/>
+      <path d="M60 186 l18 -8"/>
+    </g>
+  </g>
+
+  <!-- fiorellini pastello -->
+  <g>
+    <!-- dalia/garofano rosa -->
+    <g transform="translate(180 78) scale(1)">
+      <circle r="18" fill="#f2c7d2"/>
+      <g fill="#f6d8e0">
+        <circle r="16"/><circle cx="10" r="12"/><circle cx="-10" r="12"/><circle cy="10" r="12"/><circle cy="-10" r="12"/>
+      </g>
+      <circle r="6" fill="#e99fb3"/>
+    </g>
+
+    <!-- camomilla/margherita -->
+    <g transform="translate(132 134) scale(.9)">
+      <circle r="6.5" fill="#f2d36b"/>
+      <g fill="#fffdfa">
+        <ellipse cx="0" cy="-12" rx="4" ry="10"/>
+        <ellipse cx="10" cy="-8" rx="4" ry="10" transform="rotate(40)"/>
+        <ellipse cx="-10" cy="-8" rx="4" ry="10" transform="rotate(-40)"/>
+        <ellipse cx="0" cy="12" rx="4" ry="10"/>
+        <ellipse cx="12" cy="0" rx="4" ry="10" transform="rotate(90)"/>
+        <ellipse cx="-12" cy="0" rx="4" ry="10" transform="rotate(90)"/>
+      </g>
+    </g>
+
+    <!-- lisianthus violaceo leggero -->
+    <g transform="translate(90 200) scale(1.05)">
+      <circle r="11" fill="#e6dcf6"/>
+      <circle r="6" fill="#d1c2f0"/>
+    </g>
+  </g>
+</svg>
