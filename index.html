@@ -735,13 +735,33 @@ function showIncomingBrindisi(b){
   $('#brInYes').onclick = ()=>{ toast('Cin cin! 🥂'); close(); };
 }
 function listenBrindisi(){
-  // per me (utente)
-  db.ref('brindisi/user/'+currentUser.id).on('child_added', (snap)=>{
-    const b = snap.val(); showIncomingBrindisi(b);
+  // Per ME (user) -> mostro e poi rimuovo dal DB
+  const userPath = 'brindisi/user/'+currentUser.id;
+  db.ref(userPath).on('child_added', (snap)=>{
+    const b   = snap.val();
+    const key = snap.key;
+    // evita doppio popup in caso di reconnect rapido
+    const seenKey = 'br_user_seen_'+key;
+    if (localStorage.getItem(seenKey)) return;
+
+    showIncomingBrindisi(b);
+    localStorage.setItem(seenKey,'1');
+
+    // elimina dal DB così non ricompare più ai login futuri
+    db.ref(userPath+'/'+key).remove().catch(()=>{});
   });
-  // per il mio tavolo
-  db.ref('brindisi/table/'+currentUser.tavKey).on('child_added', (snap)=>{
-    const b = snap.val(); showIncomingBrindisi(b);
+
+  // Per il mio TAVOLO -> segno come visto su questo device
+  const tablePath = 'brindisi/table/'+currentUser.tavKey;
+  db.ref(tablePath).on('child_added', (snap)=>{
+    const b   = snap.val();
+    const key = snap.key;
+    const seenKey = 'br_table_seen_'+key;
+    if (localStorage.getItem(seenKey)) return;  // già mostrato su questo device
+
+    showIncomingBrindisi(b);
+    localStorage.setItem(seenKey,'1');
+    // NON si rimuove dal DB: serve agli altri del tavolo.
   });
 }
 
