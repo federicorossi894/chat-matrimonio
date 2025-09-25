@@ -140,7 +140,9 @@
       <div id="tableMessages" class="msgList"></div>
       <div class="inputRow">
         <input id="tableInput" placeholder="Scrivi un messaggio…" />
+        <button id="tablePicBtn" class="btn soft" title="Invia foto al tavolo">📷</button>
         <button id="tableSend" class="btn primary">Invia</button>
+        <input id="tablePicFile" type="file" accept="image/*" class="hidden">
       </div>
     </div>
   </section>
@@ -187,7 +189,6 @@
 
         <div class="field">
           <label>Selfie</label>
-          <!-- libreria o fotocamera -->
           <input id="aPhoto" type="file" accept="image/*">
           <div class="muted small">Consiglio: scatta un selfie adesso, è più divertente!</div>
         </div>
@@ -204,6 +205,17 @@
           <input id="aOptOut" type="checkbox" />
           <span>🙈 Non ricevere sfide private (brindisi)</span>
         </label>
+
+        <!-- toggle suoni -->
+        <label id="soundRow" style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <input id="aSounds" type="checkbox" checked />
+          <span>🔔 Suoni attivi</span>
+        </label>
+
+        <!-- tasto ESci (solo quando profilo aperto) -->
+        <div id="logoutRow" class="footRight hidden">
+          <button id="btnLogout" class="btn soft">Esci</button>
+        </div>
       </div>
 
       <div class="footRight">
@@ -251,6 +263,19 @@
     </div>
   </div>
 
+  <!-- avviso foto tavolo -->
+  <div id="ovPhotoWarn" class="overlay">
+    <div class="sheet">
+      <h2>Condividi la foto 📸</h2>
+      <p style="margin:6px 0 10px">Se vuoi farla vedere a <b>tutti gli ospiti</b>, caricala nell’album del matrimonio.</p>
+      <div class="footRight">
+        <a id="albumLink" class="btn soft" href="#" target="_blank" rel="noopener">Apri album</a>
+        <button id="warnCancel" class="btn soft">Annulla</button>
+        <button id="warnSend" class="btn primary">Invia solo al tavolo</button>
+      </div>
+    </div>
+  </div>
+
   <!-- annuncio staff -->
   <div id="ovAnnuncio" class="overlay">
     <div class="sheet">
@@ -278,10 +303,11 @@ const keyify = s => (s||'').trim().toLowerCase().replace(/\s+/g,'_').replace(/[^
 const now = () => Date.now();
 const toast = (t)=>{ const el=$('#toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none',2200); };
 const show = id => $$('#home,#main').forEach(x=>x.id===id?x.classList.remove('hidden'):x.classList.add('hidden'));
-const openOverlay = el => { el.style.display='flex'; }
-const closeOverlay = el => { el.style.display='none'; }
+const openOverlay = el => { if(el.style.display==='flex')return; document.body.style.overflow='hidden'; el.style.display='flex'; }
+const closeOverlay = el => { if(el.style.display!=='flex')return; el.style.display='none'; document.body.style.overflow=''; }
 const randPick = (arr, n) => arr.slice().sort(()=>Math.random()-0.5).slice(0,n);
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+document.addEventListener('click',(e)=>{const sh=e.target.closest('.sheet'); if(!sh && e.target.classList.contains('overlay')) closeOverlay(e.target);},true);
 
 function avatarEl(u){
   const a = document.createElement('div');
@@ -290,6 +316,26 @@ function avatarEl(u){
   a.setAttribute('data-full', u.photoURL||'');
   return a;
 }
+
+/* ========= SUONI (WebAudio) ========= */
+const SND = (() => {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  let unlocked=false;
+  ['touchstart','mousedown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(!unlocked){ctx.resume();unlocked=true;}},{once:true,passive:true}));
+  const getPref = ()=> localStorage.getItem('sound_on')!=='0';
+  function beep(freq=880, dur=0.08, gain=0.06, type='sine', when=0){
+    if(!getPref()) return;
+    const t = ctx.currentTime + when;
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=gain;
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+dur);
+  }
+  const pop=()=>{beep(200,.03,.09,'square',0);beep(120,.08,.05,'sine',.03);}
+  const clink=()=>{beep(1400,.04,.06,'triangle',0);beep(1800,.06,.05,'triangle',.03);}
+  const ping=()=>{beep(900,.06,.05,'sine',0);}
+  const notify=()=>{beep(600,.06,.05,'sine',0);beep(800,.06,.04,'sine',.07);}
+  return {pop,clink,ping,notify,getPref};
+})();
 
 /* ========= FIREBASE ========= */
 const firebaseConfig = {
@@ -316,7 +362,7 @@ $('#btnNew').onclick = ()=> openAuth(true);
 $('#btnLogin').onclick = ()=> openAuth(false);
 
 /* ========= AUTH ========= */
-let selectedEmoji = ''; // gestito con le righe verticali
+let selectedEmoji = ''; // per righe verticali
 
 function bindStatusRows(){
   $$('#authStep2 .statusRow').forEach(r=>{
@@ -334,8 +380,10 @@ function openAuth(isNew){
   $('#authErr').textContent = '';
   $('#authStep1').classList.remove('hidden');
   $('#authStep2').classList.add('hidden');
+  $('#logoutRow').classList.add('hidden');
   $('#aName').value = ''; $('#aPin').value = ''; $('#aTable').value = '';
   $('#aPhoto').value = ''; $('#aOptOut').checked = false;
+  $('#aSounds').checked = (localStorage.getItem('sound_on')!=='0');
   selectedEmoji = ''; $$('#authStep2 .statusRow').forEach(x=>x.classList.remove('active'));
   $('#aNext').dataset.mode = isNew ? 'new1' : 'login';
   openOverlay($('#ovAuth'));
@@ -348,8 +396,7 @@ $('#aNext').onclick = async ()=>{
 
   if (mode==='login'){
     const nome = $('#aName').value.trim();
-    bePin  = $('#aPin').value.trim();
-    const pin  = bePin;
+    const pin  = $('#aPin').value.trim();
     const tav  = $('#aTable').value.trim();
     if (!nome || !pin || !/^\d{4}$/.test(pin) || !tav){ $('#authErr').textContent='Compila nome, PIN (4 cifre) e tavolo.'; return; }
     const id = keyify(nome);
@@ -358,6 +405,8 @@ $('#aNext').onclick = async ()=>{
     const u = snap.val();
     if (String(u.pin)!==pin || u.tavolo!==tav){ $('#authErr').textContent='Nome/PIN/Tavolo non corrispondono.'; return; }
     currentUser = {...u, id};
+    localStorage.setItem('remember_user', JSON.stringify({id, nome, pin, tav}));
+    localStorage.setItem('sound_on', $('#aSounds').checked ? '1' : '0');
     afterLogin();
     closeOverlay($('#ovAuth'));
     return;
@@ -391,20 +440,52 @@ $('#aNext').onclick = async ()=>{
     if (f){
       if (!/^image\//.test(f.type)){ $('#authErr').textContent='Carica un\'immagine.'; return; }
       const path = `pfp/${tavKey}/${id}.jpg`;
-      const upload = await storage.ref(path).put(f);
-      photoURL = await upload.ref.getDownloadURL();
+      const snap = await storage.ref(path).put(f);
+      photoURL = await snap.ref.getDownloadURL();
     }
 
     const userData = { nome, pin, tavolo:tav, tavKey, emoji, photoURL, optOut, isStaff:false, ts:now() };
     await db.ref('users/'+id).set(userData);
     currentUser = {...userData, id};
+    localStorage.setItem('remember_user', JSON.stringify({id, nome, pin, tav}));
+    localStorage.setItem('sound_on', $('#aSounds').checked ? '1' : '0');
     afterLogin();
     closeOverlay($('#ovAuth'));
     return;
   }
 };
 
+/* ========= AUTOLOGIN ========= */
+(async function autologin(){
+  try{
+    const r = JSON.parse(localStorage.getItem('remember_user')||'null');
+    if (!r) return;
+    const snap = await db.ref('users/'+r.id).get();
+    if (!snap.exists()) return;
+    const u = snap.val();
+    if (u && String(u.pin)===String(r.pin) && u.tavolo===r.tav){
+      currentUser = {...u, id:r.id};
+      afterLogin();
+    }
+  }catch(e){}
+})();
+
+/* ========= LOGOUT ========= */
+$('#btnLogout')?.addEventListener('click', ()=>{
+  localStorage.removeItem('remember_user');
+  dmPeer = null; dmIdOpen = null;
+  try{
+    if (unsubDM && currentUser && dmIdOpen) db.ref('chats/dm/'+dmIdOpen+'/messages').off('child_added', unsubDM);
+    if (unsubTable && currentUser) db.ref('chats/table/'+currentUser.tavKey+'/messages').off('child_added', unsubTable);
+  }catch(e){}
+  currentUser = null;
+  show('home');
+  closeOverlay($('#ovAuth'));
+  toast('Sei uscit*');
+});
+
 /* ========= DOPO LOGIN ========= */
+let _activeTab = 'dms';
 function afterLogin(){
   $('#fabProfile').classList.remove('hidden');
   $('#btnAnnuncio').classList.toggle('hidden', !currentUser.isStaff);
@@ -414,8 +495,7 @@ function afterLogin(){
   $('#tableTitle').textContent = currentUser.tavolo;
   show('main');
   // apri per default PRIVATE (lista)
-  setTab('dms');
-  showDmList();
+  setTab('dms'); showDmList();
 
   // attach listeners
   listenTable();
@@ -430,11 +510,13 @@ $('#tabDMs').onclick   = ()=> { setTab('dms'); showDmList(); };
 $('#tabTable').onclick = ()=> setTab('table');
 
 function setTab(which){
+  if (which === _activeTab) return;
+  _activeTab = which;
   const onDM = which==='dms';
   $('#tabDMs').classList.toggle('active', onDM);
   $('#tabTable').classList.toggle('active', !onDM);
   $('#dmListView').classList.toggle('hidden', !onDM);
-  $('#dmChatView').classList.add('hidden'); // chiudi chat se cambi tab
+  $('#dmChatView').classList.add('hidden');
   $('#tableView').classList.toggle('hidden', onDM);
 }
 
@@ -447,10 +529,12 @@ function openProfile(){
   $('#authStep2').classList.remove('hidden');
   $('#aNext').textContent = 'Salva';
   $('#aNext').dataset.mode = 'saveProfile';
+  $('#logoutRow').classList.remove('hidden');
   $('#aName').value = currentUser.nome;
   $('#aPin').value = currentUser.pin;
   $('#aTable').value = currentUser.tavolo;
   $('#aOptOut').checked = !!currentUser.optOut;
+  $('#aSounds').checked = (localStorage.getItem('sound_on')!=='0');
   selectedEmoji = currentUser.emoji || '';
   $$('#authStep2 .statusRow').forEach(r=>{
     r.classList.toggle('active', (r.dataset.emo||'') === selectedEmoji);
@@ -466,12 +550,13 @@ $('#aNext').addEventListener('click', async (e)=>{
   const f = $('#aPhoto').files[0];
   if (f){
     const path = `pfp/${currentUser.tavKey}/${currentUser.id}.jpg`;
-    const upload = await storage.ref(path).put(f);
-    photoURL = await upload.ref.getDownloadURL();
+    const snap = await storage.ref(path).put(f);
+    photoURL = await snap.ref.getDownloadURL();
   }
   await db.ref('users/'+currentUser.id).update({ emoji, optOut, photoURL });
   currentUser = {...currentUser, emoji, optOut, photoURL};
   if (photoURL){ const i=document.createElement('img'); i.src=photoURL; $('#fabAva').innerHTML=''; $('#fabAva').appendChild(i); }
+  localStorage.setItem('sound_on', $('#aSounds').checked ? '1' : '0');
   closeOverlay($('#ovAuth'));
   toast('Profilo aggiornato');
 });
@@ -497,10 +582,10 @@ function renderMsg(m, me, inTable=false){
   const b = document.createElement('div');
 
   if (m.type === 'img' && m.url){
-    // messaggio immagine
     const im = document.createElement('img');
     im.className = 'msgPhoto';
     im.src = m.url;
+    im.alt = 'immagine';
     b.appendChild(im);
   } else {
     b.className='bubble';
@@ -550,6 +635,47 @@ $('#tableSend').onclick = async ()=>{
   $('#tableInput').value='';
 };
 
+/* === Foto nel TAVOLO (con avviso album) === */
+let pendingTableFile = null;
+$('#tablePicBtn').onclick = ()=> $('#tablePicFile').click();
+$('#tablePicFile').onchange = (e)=>{
+  const f = e.target.files[0]; if(!f){ e.target.value=''; return; }
+  pendingTableFile = f;
+  // apri avviso
+  openOverlay($('#ovPhotoWarn'));
+};
+$('#warnCancel').onclick = ()=>{
+  pendingTableFile = null;
+  $('#tablePicFile').value='';
+  closeOverlay($('#ovPhotoWarn'));
+};
+$('#albumLink').onclick = ()=> {
+  // TODO: sostituire link con quello reale dell’album
+  $('#albumLink').setAttribute('href', '#'); // placeholder
+  closeOverlay($('#ovPhotoWarn'));
+};
+$('#warnSend').onclick = async ()=>{
+  try{
+    if(!pendingTableFile) return;
+    const msgRef = db.ref('chats/table/'+currentUser.tavKey+'/messages').push();
+    const key = msgRef.key;
+    const path = `chat/table/${currentUser.tavKey}/${key}.jpg`;
+    const snap = await storage.ref(path).put(pendingTableFile);
+    const url  = await snap.ref.getDownloadURL();
+    await msgRef.set({
+      type:'img', url, ts:now(),
+      uid: currentUser.id, name: currentUser.nome,
+      photoURL: currentUser.photoURL||'', emoji: currentUser.emoji||'', table: currentUser.tavolo
+    });
+    toast('Foto inviata al tavolo');
+  }catch(e){ console.error(e); toast('Errore invio foto'); }
+  finally{
+    pendingTableFile = null;
+    $('#tablePicFile').value='';
+    closeOverlay($('#ovPhotoWarn'));
+  }
+};
+
 /* ========= MESSAGGIO ESTERNO verso tavoli (dal search) ========= */
 async function sendExternalToTable(tableName, tableKey, text){
   const m = {
@@ -595,6 +721,7 @@ async function openDMChat(user){
     const m = snap.val();
     $('#dmWindow').appendChild(renderMsg(m, m.uid===currentUser.id, false));
     $('#dmWindow').scrollTop = $('#dmWindow').scrollHeight;
+    if (m.uid !== currentUser.id) SND.notify();
   });
   // aggiorna meta per ordinamento
   await db.ref('chats/dm/'+id+'/meta').update({ a:currentUser.id, b:user.id, ts:now() });
@@ -639,38 +766,6 @@ $('#dmPicFile').onchange = async (e)=>{
     toast('Errore invio foto');
   }
 };
-
-async function refreshDMList(){
-  const list = $('#dmList'); list.innerHTML='';
-  const myId = currentUser?.id; if(!myId) return;
-  const snap = await db.ref('chats/dm').get();
-  let items=[];
-  snap.forEach(ch=>{
-    const meta = ch.child('meta').val();
-    if (!meta) return;
-    if (meta.a===myId || meta.b===myId){
-      const otherId = meta.a===myId ? meta.b : meta.a;
-      items.push({id:ch.key, ts:meta.ts||0, otherId});
-    }
-  });
-  items.sort((a,b)=>b.ts-a.ts);
-  if (!items.length) { $('#dmEmpty').style.display='block'; return; }
-  $('#dmEmpty').style.display='none';
-
-  for (const it of items){
-    const us = await db.ref('users/'+it.otherId).get();
-    if (!us.exists()) continue;
-    const u = us.val();
-    const row = document.createElement('div');
-    row.className='dmItem';
-    const ava = avatarEl(u);
-    const right = document.createElement('div');
-    right.innerHTML = `<div style="font-weight:700">${u.nome} ${u.emoji||''} — <span class="muted small">${u.tavolo||''}</span></div>`;
-    row.appendChild(ava); row.appendChild(right);
-    row.onclick = ()=> openDMChat({id:it.otherId, ...u});
-    list.appendChild(row);
-  }
-}
 
 /* ========= BRINDISI ========= */
 const B_USER = [
@@ -730,38 +825,19 @@ $('#bSend').onclick = async ()=>{
 function showIncomingBrindisi(b){
   $('#brInText').innerHTML = `${escapeHtml(b.fromName||'Qualcuno')} — <span class="muted">${escapeHtml(b.fromTable||'')}</span><br>ti propone: “<b>${escapeHtml(b.text||'')}</b>”`;
   openOverlay($('#ovBrIn'));
+  SND.pop();
   const close = ()=> closeOverlay($('#ovBrIn'));
-  $('#brInNo').onclick = ()=>{ toast('Brindisi rifiutato'); close(); };
-  $('#brInYes').onclick = ()=>{ toast('Cin cin! 🥂'); close(); };
+  $('#brInNo').onclick = ()=>{ SND.ping(); toast('Brindisi rifiutato'); close(); };
+  $('#brInYes').onclick = ()=>{ SND.clink(); toast('Cin cin! 🥂'); close(); };
 }
 function listenBrindisi(){
-  // Per ME (user) -> mostro e poi rimuovo dal DB
-  const userPath = 'brindisi/user/'+currentUser.id;
-  db.ref(userPath).on('child_added', (snap)=>{
-    const b   = snap.val();
-    const key = snap.key;
-    // evita doppio popup in caso di reconnect rapido
-    const seenKey = 'br_user_seen_'+key;
-    if (localStorage.getItem(seenKey)) return;
-
-    showIncomingBrindisi(b);
-    localStorage.setItem(seenKey,'1');
-
-    // elimina dal DB così non ricompare più ai login futuri
-    db.ref(userPath+'/'+key).remove().catch(()=>{});
+  // per me (utente)
+  db.ref('brindisi/user/'+currentUser.id).on('child_added', (snap)=>{
+    const b = snap.val(); showIncomingBrindisi(b);
   });
-
-  // Per il mio TAVOLO -> segno come visto su questo device
-  const tablePath = 'brindisi/table/'+currentUser.tavKey;
-  db.ref(tablePath).on('child_added', (snap)=>{
-    const b   = snap.val();
-    const key = snap.key;
-    const seenKey = 'br_table_seen_'+key;
-    if (localStorage.getItem(seenKey)) return;  // già mostrato su questo device
-
-    showIncomingBrindisi(b);
-    localStorage.setItem(seenKey,'1');
-    // NON si rimuove dal DB: serve agli altri del tavolo.
+  // per il mio tavolo
+  db.ref('brindisi/table/'+currentUser.tavKey).on('child_added', (snap)=>{
+    const b = snap.val(); showIncomingBrindisi(b);
   });
 }
 
