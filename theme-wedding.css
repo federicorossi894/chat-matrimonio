@@ -163,6 +163,6 @@
   background: url("wedding-bottom-left.svg") no-repeat bottom left;
   background-size: contain;
   pointer-events: none;
-  opacity: 0.4;
-    z-index:-1;       /* resta dietro al contenuto */
+  opacity: 0.6;
+  z-index:-1;       /* resta dietro al contenuto */
 }
