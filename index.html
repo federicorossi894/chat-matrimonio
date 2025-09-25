@@ -1,998 +1,773 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>Chat Matrimonio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --bd:#ddd; --ok:#1a8f3a; --err:#b00020; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#fafafa; color:#111; }
-    section { padding:16px; max-width:560px; margin:0 auto; }
-    h1,h2,h3 { margin:8px 0; }
-    .fld { width:100%; padding:12px; border:1px solid var(--bd); border-radius:10px; background:#fff; }
-    .btn { padding:10px 14px; border:none; border-radius:10px; cursor:pointer; }
-    .btn.dark { background:#111; color:#fff; }
-    .btn.light { background:#eee; }
-    .row { display:flex; gap:8px; align-items:center; }
-    .list { display:flex; flex-direction:column; gap:8px; }
-    .pill { background:#eee; border:none; border-radius:999px; padding:6px 10px; cursor:pointer; }
-    .msg { background:#fff; border:1px solid var(--bd); border-radius:10px; padding:8px 10px; }
-    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:999; padding:16px; }
-    .sheet { background:#fff; border-radius:14px; padding:16px; width:min(560px, 94vw); max-height:92vh; overflow:auto; }
-    .avatar32 { width:32px; height:32px; border-radius:50%; object-fit:cover; background:#f2f2f2; }
-    .avatar28 { width:28px; height:28px; border-radius:50%; object-fit:cover; background:#eee; border:1px solid #ddd; flex:0 0 28px; }
-    .avatar24 { width:24px; height:24px; border-radius:50%; object-fit:cover; background:#eee; border:1px solid #ddd; }
-    .avatarBtn { width:36px; height:36px; border-radius:50%; object-fit:cover; background:#eee; border:1px solid var(--bd); }
-    .emojiList { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
-    .emojiRow { display:flex; align-items:center; gap:12px; width:100%; padding:10px; border:1px solid var(--bd); border-radius:10px; background:#fff; cursor:pointer; text-align:left; }
-    .emojiRow:hover { background:#fafafa; }
-    .emojiRow.is-selected { border-color:#111; box-shadow:0 0 0 2px #111 inset; }
-    .bigEmoji { font-size:22px; width:26px; text-align:center; }
-    .emojiText { font-size:15px; color:#222; }
-    .br-sugg { padding:8px 10px; border:1px solid var(--bd); border-radius:10px; background:#fff; cursor:pointer; text-align:left; }
-    .br-sugg:hover { background:#fafafa; }
-    .badge { background:#111; color:#fff; border-radius:8px; padding:2px 6px; font-size:12px; }
-    .imgMsg { max-width:60%; border-radius:10px; display:block; }
-    #chatWindow, #dmWindow { background:#fff; border:1px solid var(--bd); border-radius:12px; padding:10px; }
-    #toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:26px; background:#111; color:#fff; padding:10px 14px; border-radius:12px; display:none; z-index:1000; }
-    .msgRow { display:flex; align-items:flex-start; gap:8px; }
-    .msgBubble { background:#fff; border:1px solid var(--bd); border-radius:10px; padding:6px 10px; max-width:80%; }
-    .msgHeader { font-size:12px; color:#666; margin-bottom:4px; }
-    #dmTabs .pill { background:#eee; }
-    #dmTabs .pill.active { background:#111; color:#fff; }
-
-    /* HOME polished */
-    .hero {
-      min-height: 92vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 28px 16px;
-      background: radial-gradient(1200px 600px at 50% -20%, #fff 0, #f7f7f7 60%, #f2f2f2 100%);
+    :root{
+      --bg:#f6f6f7; --card:#ffffff; --ink:#111; --muted:#666; --brand:#0b0b0c;
+      --pill:#111; --pillText:#fff; --accent:#111; --ok:#0a7f3f; --err:#b00020;
+      --chip:#efefef; --line:#e8e8ea;
     }
-    .card {
-      width: 100%;
-      max-width: 440px;
-      background: #fff;
-      border: 1px solid var(--bd);
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.05);
-      padding: 20px 18px;
-      text-align: center;
-    }
-    .appMark { display:inline-flex; align-items:center; gap:8px; font-weight:800; letter-spacing:.3px; margin-bottom:6px; }
-    .appMark .logo { width:36px; height:36px; }
-    .card h1 { font-size: 26px; margin: 6px 0 12px; }
-    .card p  { color:#444; line-height:1.45; margin: 0 0 12px; }
-    .actions { display:flex; flex-direction:column; gap:10px; margin-top: 12px; }
-    .actions .btn { width:100%; padding: 14px 16px; font-size:16px; border-radius:12px; }
-    .subtle { font-size:12px; color:#777; margin-top:10px; }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
+    .wrap{max-width:960px;margin:0 auto;padding:16px}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.06);padding:20px}
+    h1{margin:0 0 12px;font-size:28px}
+    p{margin:8px 0;color:var(--muted);line-height:1.5}
 
-    @media (prefers-color-scheme: dark) {
-      body { background:#0f0f10; color:#eee; }
-      .card { background:#161617; border-color:#2a2a2c; }
-      .subtle { color:#aaa; }
-      .btn.light { background:#2a2a2c; color:#fff; }
+    .home{display:flex;min-height:100dvh;align-items:center;justify-content:center}
+    .home .card{max-width:560px;text-align:center}
+
+    .btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:600;cursor:pointer}
+    .btn.primary{background:#111;color:#fff}
+    .btn.ghost{background:#eee;color:#111}
+    .btn.block{display:block;width:100%}
+    .btn.small{padding:8px 12px;border-radius:8px;font-weight:600}
+    .row{display:flex;gap:12px}
+    .col{display:flex;flex-direction:column;gap:12px}
+    .mt16{margin-top:16px}
+    .mt24{margin-top:24px}
+    .hide{display:none !important}
+
+    /* App chrome */
+    header{display:flex;align-items:center;gap:10px;padding:10px}
+    header .title{font-weight:700}
+    .tabs{display:flex;gap:8px;margin-left:auto}
+    .tab{padding:8px 12px;border-radius:16px;background:#eee;cursor:pointer;font-weight:600}
+    .tab.active{background:#111;color:#fff}
+    .actions{display:flex;gap:8px;margin-left:8px}
+    .chip{background:var(--chip);border-radius:10px;padding:6px 10px;color:#111}
+    .sep{height:1px;background:var(--line);margin:8px 0}
+
+    /* Layout chat */
+    .app{display:flex;flex-direction:column;min-height:100dvh}
+    .content{display:grid;grid-template-columns:280px 1fr;gap:12px;padding:12px}
+    .list{background:var(--card);border-radius:12px;padding:8px;min-height:60vh}
+    .list h3{margin:6px 8px 6px;font-size:14px;color:var(--muted)}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer}
+    .dm-item:hover{background:#f1f1f3}
+    .avatar{width:28px;height:28px;border-radius:50%;background:#ddd;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#555;overflow:hidden}
+    .room{background:var(--card);border-radius:12px;display:flex;flex-direction:column;min-height:60vh}
+    .room-head{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--line)}
+    .room-body{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .msg{display:flex;gap:8px;align-items:flex-start}
+    .bubble{background:#f3f3f5;border:1px solid #ececef;color:#111;padding:8px 10px;border-radius:10px;max-width:70%}
+    .you .bubble{background:#111;color:#fff;border-color:#111;margin-left:auto}
+    .sys .bubble{background:#fff7d5;border-color:#ffe484}
+    .room-send{display:flex;gap:8px;border-top:1px solid var(--line);padding:8px}
+    input[type=text], input[type=password], select, textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;outline:0}
+    .ghost-btn{background:#eee;border-radius:8px;padding:6px 8px;cursor:pointer}
+
+    /* Floating profile button */
+    .fab-prof{position:fixed;right:16px;bottom:16px;background:#fff;border:1px solid #e5e5e8;border-radius:999px;padding:6px 8px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+    .fab-prof .avatar{width:22px;height:22px}
+
+    /* Modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:30}
+    .modal{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:16px}
+    .modal h3{margin:6px 0 10px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .search{padding:10px;border:1px solid #ddd;border-radius:10px;margin-bottom:8px}
+
+    /* Profilo */
+    .profile{max-width:520px;margin:0 auto}
+    .pf-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .pf-emoji{display:grid;grid-template-columns:auto 1fr;row-gap:8px;column-gap:10px;align-items:center}
+    .pf-emoji .btn.small{width:44px;justify-content:center}
+    .hint{color:var(--muted);font-size:13px}
+    .ok{color:var(--ok)} .err{color:var(--err)}
+    @media (max-width:860px){
+      .content{grid-template-columns:1fr}
+      .list{order:2}
+      .room{order:1}
     }
   </style>
 </head>
 <body>
 
-<!-- HOME -->
-<section id="screen-home" class="hero">
-  <div class="card">
-    <div class="appMark">
-      <span class="logo">
-        <!-- Logo EF -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 100 100">
-          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#111"/><stop offset="100%" stop-color="#444"/></linearGradient></defs>
-          <circle cx="50" cy="50" r="48" fill="url(#g)" />
-          <text x="50%" y="55%" text-anchor="middle" font-size="42" font-weight="700" fill="#fff" font-family="system-ui,-apple-system,sans-serif">EF</text>
-        </svg>
-      </span>
-      <span>Chat Matrimonio</span>
-    </div>
+<!-- ===== HOME ===== -->
+<section id="home" class="home">
+  <div class="wrap">
+    <div class="card">
+      <div class="avatar" style="width:36px;height:36px;margin:0 auto 8px;background:#111;color:#fff">EF</div>
+      <h1>Benvenuto 🎉</h1>
+      <p>Qui puoi <b>conoscere e chattare con gli altri invitati del matrimonio</b>.</p>
+      <p>Puoi lanciare un <b>brindisi speciale</b> 🥂 per rompere il ghiaccio,<br/>
+         oppure aprire una <b>chat privata</b> 💌 per parlare direttamente con chi vuoi.<br/>
+         Se preferisci, c’è anche la chat del tuo tavolo.</p>
+      <p><b>Nota:</b> tutto quello che succede qui si cancella dopo <b>72 ore</b>… quindi divertiti e lasciati andare 😉</p>
 
-    <h1>Benvenuto 🎉</h1>
-
-    <p>Qui puoi chiacchierare con il tuo tavolo<br>o conoscere e chattare con altri ospiti.</p>
-    <p>Puoi sfidare gli altri a brindisi speciali 🍾<br>oppure aprire chat private 💌 per parlare direttamente con chi vuoi.</p>
-    <p class="subtle">Tutto ciò che succede qui viene cancellato automaticamente dopo <strong>72 ore</strong> — quindi… buttati!</p>
-
-    <div class="actions">
-      <button id="btnCreate" class="btn dark">Crea nuovo profilo</button>
-      <button id="btnLogin"  class="btn light">Rientra nel tuo profilo</button>
-    </div>
-  </div>
-</section>
-
-<!-- CREATE -->
-<section id="screen-create" style="display:none">
-  <h2>Crea il tuo profilo</h2>
-  <label>Nome</label>
-  <input id="cName" class="fld" placeholder="Es. Federico">
-  <label>Tavolo</label>
-  <select id="cTable" class="fld">
-    <option value="" disabled selected>Seleziona tavolo</option>
-    <option>Tavolo 1</option><option>Tavolo 2</option><option>Tavolo 3</option><option>Tavolo 4</option>
-  </select>
-  <label>PIN (4 cifre)</label>
-  <input id="cPin" class="fld" type="password" maxlength="4" placeholder="----">
-
-  <label>Foto profilo</label>
-  <input id="cFoto" type="file" accept="image/*,.heic,.HEIC">
-
-  <!-- Emoji bloccate finché non compili i 3 campi -->
-  <div id="emojiBlock" style="display:none">
-    <label style="display:block;margin:8px 0 6px">Emoji / Status</label>
-    <div id="emojiList" class="emojiList">
-      <button class="emojiRow" data-emoji="💍" data-label="Impegnato/a"><span class="bigEmoji">💍</span><span class="emojiText">Impegnato/a</span></button>
-      <button class="emojiRow" data-emoji="😊" data-label="Disponibile a chiacchierare"><span class="bigEmoji">😊</span><span class="emojiText">Disponibile a chiacchierare</span></button>
-      <button class="emojiRow" data-emoji="🎉" data-label="Voglia di festa"><span class="bigEmoji">🎉</span><span class="emojiText">Voglia di festa</span></button>
-      <button class="emojiRow" data-emoji="🤔" data-label="Sorprendimi"><span class="bigEmoji">🤔</span><span class="emojiText">Sorprendimi</span></button>
-      <button class="emojiRow" data-emoji="" data-label="Nessuna"><span class="bigEmoji">—</span><span class="emojiText">Nessuna</span></button>
-    </div>
-  </div>
-
-  <button id="cSave" class="btn dark" style="margin-top:12px">Continua</button>
-  <div id="cMsg" style="margin-top:10px"></div>
-</section>
-
-<!-- LOGIN -->
-<section id="screen-login" style="display:none">
-  <h2>Rientra nel tuo profilo</h2>
-  <label>Nome</label>
-  <input id="lName" class="fld">
-  <label>PIN</label>
-  <input id="lPin" class="fld" type="password" maxlength="4" placeholder="----">
-  <label>Tavolo</label>
-  <select id="lTable" class="fld">
-    <option value="" disabled selected>Seleziona tavolo</option>
-    <option>Tavolo 1</option><option>Tavolo 2</option><option>Tavolo 3</option><option>Tavolo 4</option>
-  </select>
-  <button id="lGo" class="btn dark" style="margin-top:12px">Accedi</button>
-  <div id="lMsg" style="margin-top:10px;color:var(--err)"></div>
-</section>
-
-<!-- CHAT TAVOLO + DM -->
-<section id="screen-chat" style="display:none">
-  <div class="row" style="justify-content:space-between;align-items:center">
-    <div class="row" style="gap:10px">
-      <img id="meAvatarBtn" class="avatarBtn" alt="Profilo">
-      <h2 id="chatTitle" style="margin:0">Tavolo</h2>
-      <span id="meBadge" class="badge" style="display:none">STAFF</span>
-    </div>
-    <div class="row">
-      <div id="dmTabs" class="row" style="gap:0">
-        <button id="tabTable" class="pill" style="border-top-right-radius:0;border-bottom-right-radius:0">Tavolo</button>
-        <button id="tabDMs"   class="pill" style="border-top-left-radius:0;border-bottom-left-radius:0">Private</button>
+      <div class="row mt24" style="justify-content:center;flex-wrap:wrap;gap:10px">
+        <button id="btnNew" class="btn primary">Crea nuovo profilo</button>
+        <button id="btnReturn" class="btn ghost">Rientra nel tuo profilo</button>
       </div>
-      <button id="btnNewDM" class="pill" title="Nuova chat privata" style="display:none">➕💬</button>
-      <button id="btnAnnuncio" class="pill" title="Annuncio" style="display:none">📢</button>
-      <button id="btnBrindisi" class="pill" title="Brindisi">🍾</button>
     </div>
-  </div>
-
-  <div id="chatWindow" style="margin:10px 0; height:320px; overflow:auto"></div>
-
-  <!-- Lista chat private -->
-  <div id="dmList" class="list" style="display:none; margin:10px 0"></div>
-
-  <div class="row">
-    <input id="chatInput" class="fld" placeholder="Scrivi un messaggio…">
-    <button id="chatPhoto" class="btn light" title="Invia foto">📷</button>
-    <button id="chatSend" class="btn dark">Invia</button>
-  </div>
-  <input id="chatPhotoFile" type="file" accept="image/*,.heic,.HEIC" style="display:none">
-
-  <div class="row" style="margin-top:10px; justify-content:space-between">
-    <button id="btnLogout" class="btn light">Esci</button>
   </div>
 </section>
 
-<!-- PROFILO -->
-<section id="screen-profile" style="display:none">
-  <h2>Profilo</h2>
-  <div class="row" style="gap:12px">
-    <img id="pFoto" class="avatar32" style="width:80px;height:80px" alt="">
-    <div>
-      <div id="pName" style="font-weight:700"></div>
-      <div id="pTable" style="color:#666"></div>
-      <div id="pFlags" style="margin-top:6px"></div>
-    </div>
-  </div>
+<!-- ===== APP ===== -->
+<section id="app" class="app hide">
+  <header>
+    <div class="title"><span id="meBadge" class="chip">…</span></div>
 
-  <div class="row" style="margin-top:12px">
-    <button id="pChangeFoto" class="btn light">Cambia/aggiungi foto</button>
-    <input id="pFotoInput" type="file" accept="image/*,.heic,.HEIC" style="display:none">
-  </div>
-
-  <div style="margin-top:12px">
-    <label style="display:block;margin:8px 0 6px">Emoji / Status</label>
-    <div id="pEmojiList" class="emojiList">
-      <button class="emojiRow" data-emoji="💍" data-label="Impegnato/a"><span class="bigEmoji">💍</span><span class="emojiText">Impegnato/a</span></button>
-      <button class="emojiRow" data-emoji="😊" data-label="Disponibile a chiacchierare"><span class="bigEmoji">😊</span><span class="emojiText">Disponibile a chiacchierare</span></button>
-      <button class="emojiRow" data-emoji="🎉" data-label="Voglia di festa"><span class="bigEmoji">🎉</span><span class="emojiText">Voglia di festa</span></button>
-      <button class="emojiRow" data-emoji="🤔" data-label="Sorprendimi"><span class="bigEmoji">🤔</span><span class="emojiText">Sorprendimi</span></button>
-      <button class="emojiRow" data-emoji="" data-label="Nessuna"><span class="bigEmoji">—</span><span class="emojiText">Nessuna</span></button>
+    <!-- Tabs (default: Private) -->
+    <div class="tabs">
+      <div id="tabDMs" class="tab active">Private</div>
+      <div id="tabTable" class="tab">Tavolo</div>
     </div>
 
-    <label style="display:flex;align-items:center;gap:8px;margin-top:6px">
-      <input id="pOptOut" type="checkbox"> 🙊 Non ricevere sfide private 🍾
-    </label>
-  </div>
+    <!-- Actions a destra: Brindisi / Annunci / Nuova chat -->
+    <div class="actions">
+      <button id="btnBrindisi" class="btn small" title="Proponi brindisi">🍾</button>
+      <button id="btnAnnuncio" class="btn small hide" title="Annuncio a tutti">📣</button>
+      <button id="btnNewDM" class="btn small" title="Nuova chat">➕</button>
+    </div>
+  </header>
 
-  <div class="row" style="margin-top:12px">
-    <button id="pBack" class="btn light">Indietro</button>
-    <button id="pSave" class="btn dark">Salva</button>
+  <div class="content">
+    <!-- Elenco DM -->
+    <aside class="list" id="dmList">
+      <h3>Le tue chat</h3>
+      <div id="dmItems"></div>
+      <div class="sep"></div>
+      <button id="btnNewDM2" class="btn ghost block">Nuova chat privata</button>
+    </aside>
+
+    <!-- Finestra chat -->
+    <div class="room">
+      <div class="room-head">
+        <div id="roomAvatar" class="avatar">?</div>
+        <div style="font-weight:700" id="roomTitle">Seleziona una chat…</div>
+        <div class="chip" id="roomSub" style="margin-left:auto"></div>
+      </div>
+      <div class="room-body" id="chatWindow"></div>
+      <div class="room-send">
+        <input id="msgInput" type="text" placeholder="Scrivi un messaggio…" />
+        <button id="btnSend" class="btn primary">Invia</button>
+      </div>
+    </div>
   </div>
-  <div id="pMsg" style="margin-top:8px"></div>
 </section>
 
-<!-- DM CHAT -->
-<section id="screen-dm-chat" style="display:none">
-  <div class="row" style="justify-content:space-between;align-items:center">
-    <button id="dmc_back" class="pill">⬅︎</button>
-    <h2 id="dmTitle" style="margin:8px 0">Chat privata</h2>
-    <span></span>
-  </div>
-  <div id="dmWindow" style="margin:8px 0 12px; height:310px; overflow:auto"></div>
-  <div class="row">
-    <input id="dmInput" class="fld" placeholder="Scrivi un messaggio…">
-    <button id="dmPhoto" class="btn light">📷</button>
-    <button id="dmSend" class="btn dark">Invia</button>
-  </div>
-  <input id="dmPhotoFile" type="file" accept="image/*,.heic,.HEIC" style="display:none">
-</section>
+<!-- FAB profilo -->
+<button id="fabProfile" class="fab-prof hide">
+  <div class="avatar" id="meAvatar"></div><div>Profilo</div>
+</button>
 
-<!-- OVERLAY: Ricerca -->
-<div id="ovlSearch" class="overlay">
-  <div class="sheet">
-    <h3>Cerca ospite o tavolo</h3>
-    <input id="sQuery" class="fld" placeholder="Es. Edoardo oppure Tavolo 3">
-    <div id="sResults" class="list" style="margin-top:10px; max-height:300px; overflow:auto"></div>
-    <div class="row" style="justify-content:flex-end;margin-top:10px">
-      <button id="sClose" class="btn light">Chiudi</button>
-    </div>
-  </div>
-</div>
+<!-- ===== OVERLAY: login/return/profile/search/brindisi ===== -->
+<div id="ov" class="overlay"><div id="ovBox" class="modal"></div></div>
 
-<!-- OVERLAY: Brindisi - Step 2 -->
-<div id="ovlBrStep2" class="overlay">
-  <div class="sheet" style="max-width:560px">
-    <h3 id="br2_title">🍾 Brindisi</h3>
-    <div id="br2_sub" style="color:#666;margin-top:4px;margin-bottom:10px">Scegli una sfida oppure scrivi la tua.</div>
-    <div style="font-weight:600;margin:8px 0 6px" id="br2_label">Proposte per te</div>
-    <div id="br2_list" class="list"></div>
-    <button id="br2_more" class="pill" style="margin-top:8px">🔄 Mostra altre</button>
-    <input id="br2_free" class="fld" placeholder="…oppure scrivi qui la tua sfida" style="margin-top:10px">
-    <div style="font-size:12px;color:#666;margin-top:6px">Dopo l’invio dovrai attendere 60s per un altro brindisi.</div>
-    <div class="row" style="justify-content:flex-end;margin-top:12px">
-      <button id="br2_cancel" class="btn light">Annulla</button>
-      <button id="br2_send"   class="btn dark">Invia brindisi</button>
-    </div>
-    <div id="br2_msg" style="color:var(--err);margin-top:6px"></div>
-  </div>
-</div>
-
-<!-- OVERLAY: Brindisi ricevuto -->
-<div id="ovlBrRecv" class="overlay">
-  <div class="sheet">
-    <h3 id="brRecvTitle">🍾 Proposta di brindisi</h3>
-    <div id="brRecvText" style="margin:8px 0 12px"></div>
-    <div class="row" style="justify-content:flex-end">
-      <button id="brRecvDecline" class="btn light">Rifiuta</button>
-      <button id="brRecvAccept" class="btn dark">Accetta & Brinda</button>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY: Foto in chat tavolo → link album -->
-<div id="ovlAlbumHint" class="overlay">
-  <div class="sheet" style="max-width:520px">
-    <h3>Condividi meglio questa foto 📸</h3>
-    <p style="margin:8px 0 10px">
-      Se la mandi qui la vedranno solo le persone del tuo tavolo.<br>
-      Meglio caricarla nell’album ufficiale: così la vedono tutti gli ospiti.
-    </p>
-    <div class="row" style="justify-content:flex-end;margin-top:12px">
-      <a id="albumLink" class="btn dark" target="_blank" rel="noopener">Vai all’album ufficiale</a>
-      <button id="albumDismiss" class="btn light">Invia comunque al tavolo</button>
-    </div>
-  </div>
-</div>
-
-<!-- LIGHTBOX FOTO -->
-<div id="ovlPhoto" class="overlay">
-  <div class="sheet" style="padding:0;max-width:90vw;max-height:90vh;display:flex;flex-direction:column;align-items:flex-end">
-    <button id="photoClose" class="btn light" style="margin:8px">Chiudi ✕</button>
-    <img id="photoBig" src="" alt="Foto" style="max-width:100%;max-height:80vh;object-fit:contain;margin:auto">
-  </div>
-</div>
-
-<!-- OVERLAY: Annuncio staff (invio) -->
-<div id="ovlAnnuncioSend" class="overlay">
-  <div class="sheet">
-    <h3>Annuncio a tutti 📢</h3>
-    <input id="annText" class="fld" placeholder="Es. Torta tra 5 minuti!">
-    <div class="row" style="justify-content:flex-end;margin-top:10px">
-      <button id="annCancel" class="btn light">Annulla</button>
-      <button id="annSend" class="btn dark">Invia</button>
-    </div>
-    <div id="annMsg" style="margin-top:6px"></div>
-  </div>
-</div>
-
-<!-- OVERLAY: Annuncio ricevuto -->
-<div id="ovlAnnuncioShow" class="overlay">
-  <div class="sheet" style="text-align:center">
-    <div id="annBody" style="font-size:18px"></div>
-    <div style="margin-top:12px">
-      <button id="annOk" class="btn dark">Ok</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<!-- HEIC converter -->
-<script src="https://cdn.jsdelivr.net/npm/browser-heic-converter@1.0.2/dist/index.umd.min.js"></script>
-
-<!-- FIREBASE + LOGICA -->
 <script type="module">
+  /* ====================== Firebase ======================= */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { getDatabase, ref, child, get, set, update, push, onChildAdded, onValue } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
-  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
+  import {
+    getDatabase, ref, child, set, get, push, onChildAdded, onValue, update,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+  import {
+    getStorage, ref as sRef, uploadBytes, getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
-  // ==== CONFIG FIREBASE ====
   const firebaseConfig = {
-    apiKey: "AIzaSyAGGNyJE0Nj_KMb-jHjxWXTULa-gT3W9XQ",
+    apiKey: "AIzaSyAGGNy0N_jMbJ-8JKWTTLU-qT3M9XO",
     authDomain: "chat-matrimonio.firebaseapp.com",
-    databaseURL: "https://chat-matrimonio-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "chat-matrimonio",
     storageBucket: "chat-matrimonio.appspot.com",
     messagingSenderId: "533930991153",
-    appId: "1:533930991153:web:d4c47af448e6ebfce73f10"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const storage = getStorage(app);
-
-  // ==== UTIL ====
-  const $ = (id)=>document.getElementById(id);
-  const norm  = (s)=> (s||'').trim().replace(/\s+/g,' ').replace(/[^\p{L}\p{N}\s.'-]/gu,'');
-  const keyify= (s)=> norm(s).toLowerCase();
-  const userPath = (t, n)=> `utenti/${t}/${keyify(n)}`;
-  const toast = (t)=>{ const el=$('toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none', 2000); };
-  const niceErr = (e)=> e?.message || (typeof e==='string'?e:String(e||'Errore'));
-
-  // HEIC helpers
-  function isHeic(file){ const n=(file?.name||'').toLowerCase(), t=(file?.type||'').toLowerCase(); return n.endsWith('.heic')||n.endsWith('.heif')||t.includes('heic')||t.includes('heif'); }
-  function blobToDataURL(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(new Error('Impossibile leggere il file.')); r.readAsDataURL(blob); }); }
-  async function resizeToJpeg(dataURL, maxSide=900, quality=0.82){
-    const img = await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>rej(new Error('Formato immagine non supportato.')); i.src=dataURL; });
-    const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-    const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
-    const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
-    const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
-    const blob=await new Promise((res,rej)=>canvas.toBlob(b=>b?res(b):rej(new Error('Impossibile comprimere l’immagine.')),'image/jpeg',quality));
-    return blob;
-  }
-  async function toCompressedJpeg(file, maxSide=900, quality=0.82){
-    let startBlob=file;
-    if (isHeic(file)) {
-      if (!(window.HEIC && window.HEIC.convert)) throw new Error("Il tuo browser non supporta ancora HEIC. Scegli JPG/PNG.");
-      startBlob = await window.HEIC.convert(file, { toType:"image/jpeg", quality });
-    }
-    const dataURL = await blobToDataURL(startBlob);
-    return await resizeToJpeg(dataURL, maxSide, quality);
-  }
-
-  // ==== STATO ====
-  let currentUser = null; // {nome,tavolo,pin,emoji,fotoUrl,staff,canReset,optOutBrindisi}
-  let chatUnsub = null;
-  let dmUnsub = null;
-  let dmIndexUnsub = null;
-  let ALL_USERS = [];
-  const AVATAR_CACHE = {}; // `${table}::${nameKey}` -> url | null
-
-  // ==== NAV ====
-  const screens = {
-    home: $('screen-home'), create: $('screen-create'), login: $('screen-login'),
-    chat: $('screen-chat'), profile: $('screen-profile'),
-    dmChat: $('screen-dm-chat'),
-  };
-  function show(which){
-    Object.values(screens).forEach(s=> s.style.display='none');
-    screens[which].style.display='block';
-  }
-
-  // ==== HOME BTN ====
-  $('btnCreate').onclick = ()=> show('create');
-  $('btnLogin').onclick  = ()=> show('login');
-
-  // ==== EMOJI (create) ====
-  const emojiListEl = $('emojiList');
-  let selectedEmoji = "";
-  function bindEmojiList(initial=""){
-    selectedEmoji = initial || "";
-    [...emojiListEl.querySelectorAll('.emojiRow')].forEach(btn=>{
-      btn.classList.toggle('is-selected', btn.dataset.emoji===(selectedEmoji||""));
-      btn.onclick = ()=>{
-        selectedEmoji = btn.dataset.emoji || "";
-        [...emojiListEl.querySelectorAll('.emojiRow')].forEach(b=>b.classList.remove('is-selected'));
-        btn.classList.add('is-selected');
-      };
-    });
-  }
-  bindEmojiList();
-
-  // mostra emoji solo quando nome+tavolo+pin sono validi
-  const cName = $('cName'), cTable=$('cTable'), cPin=$('cPin'), emojiBlock=$('emojiBlock');
-  function createValid(){ return norm(cName.value) && cTable.value && /^\d{4}$/.test((cPin.value||'').trim()); }
-  function updateEmojiVisibility(){ emojiBlock.style.display = createValid()? 'block':'none'; if (emojiBlock.style.display==='block') bindEmojiList(selectedEmoji||""); }
-  ['input','change','keyup'].forEach(ev=>{ cName.addEventListener(ev,updateEmojiVisibility); cTable.addEventListener(ev,updateEmojiVisibility); cPin.addEventListener(ev,updateEmojiVisibility); });
-  updateEmojiVisibility();
-
-  // ==== CREA PROFILO ====
-  $('cSave').onclick = async ()=>{
-    const nome  = norm($('cName').value);
-    const tavolo= $('cTable').value;
-    const pin   = ($('cPin').value||'').trim();
-    const fotoFile = $('cFoto').files?.[0] || null;
-    const msg = $('cMsg'); msg.textContent=''; msg.style.color= 'inherit';
-    if (!nome || !tavolo || !/^\d{4}$/.test(pin)) { msg.style.color='var(--err)'; msg.textContent='Compila nome, tavolo e PIN di 4 cifre.'; return; }
-
-    const path = userPath(tavolo, nome);
-    try {
-      const snap = await get(child(ref(db), path));
-      if (snap.exists()){ msg.style.color='var(--err)'; msg.textContent=`Nome già usato al ${tavolo}. Aggiungi l’iniziale del cognome.`; return; }
-
-      const user = { nome, nomeKey:keyify(nome), tavolo, pin, emoji:selectedEmoji||null, fotoUrl:null, staff:false, canReset:false, optOutBrindisi:false, createdAt:Date.now() };
-
-      if (fotoFile){
-        const jpeg = await toCompressedJpeg(fotoFile, 900, 0.85);
-        const p = `pfp/${tavolo}/${keyify(nome)}.jpg`;
-        const r = sRef(storage, p);
-        await uploadBytes(r, jpeg, { contentType:'image/jpeg' });
-        user.fotoUrl = await getDownloadURL(r);
-      }
-
-      await set(ref(db, path), user);
-      currentUser = user;
-      enterChatRoom();
-    } catch(e){ msg.style.color='var(--err)'; msg.textContent='Errore: '+niceErr(e); }
+    appId: "1:533930991153:web:d4c47af448e6ebfce73f10",
+    databaseURL: "https://chat-matrimonio-default-rtdb.europe-west1.firebasedatabase.app"
   };
 
-  // ==== LOGIN (con tavolo) ====
-  $('lGo').onclick = async ()=>{
-    const nome  = norm($('lName').value);
-    const pin   = ($('lPin').value||'').trim();
-    const tavolo= $('lTable').value;
-    if (!nome || !/^\d{4}$/.test(pin) || !tavolo){ $('lMsg').textContent='Inserisci nome, PIN (4 cifre) e tavolo.'; return; }
-    try{
-      const snap = await get(child(ref(db), userPath(tavolo, nome)));
-      if (snap.exists() && snap.val().pin===pin){
-        currentUser = snap.val();
-        enterChatRoom(); $('lMsg').textContent=''; return;
-      }
-      $('lMsg').textContent='Nome/PIN/Tavolo non validi.';
-    }catch(e){ $('lMsg').textContent='Errore: '+niceErr(e); }
+  const appFB = initializeApp(firebaseConfig);
+  const db = getDatabase(appFB);
+  const storage = getStorage(appFB);
+
+  /* ====================== Stato locale ======================= */
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => document.querySelectorAll(sel);
+
+  let currentUser = null;        // {nome, tavolo, pin, emoji, optOutBrindisi, pfp}
+  let currentRoom = null;        // {type:'dm'|'table', id: 'tavolo1' | dmId, title, otherUser?}
+  let dmUnsubs = {};             // listeners dm
+  let tableUnsub = null;         // listener tavolo
+  const TABLES = [1,2,3,4,5,6,7,8,9,10]; // fittizi
+
+  /* ====================== Util ======================= */
+  const keyify = s => (s||'').toLowerCase().trim().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+  const dmIdFor = (a,b) => ['dm', keyify(a), keyify(b)].sort().join('_'); // simmetrico
+  const now = () => Date.now();
+
+  const toast = (msg, ok=true) => {
+    const b = document.createElement('div');
+    b.className = 'card';
+    b.style.position='fixed'; b.style.left='50%'; b.style.top='20px'; b.style.transform='translateX(-50%)';
+    b.style.zIndex=50; b.style.padding='10px 14px'; b.style.fontWeight='600';
+    b.style.border = `1px solid ${ok?'#cfe9d8':'#f6c0c0'}`;
+    b.style.background = ok?'#eaf7f0':'#fdeeee'; b.style.color= ok?'#0b6b3f':'#8a0e0e';
+    b.textContent = msg; document.body.appendChild(b); setTimeout(()=>b.remove(), 2200);
   };
 
-  // ==== AVATAR Utils ====
-  function getAvatarKey(table, name){ return `${table}::${keyify(name)}`; }
-  function makeAvatarImg(name, table){
-    const img = document.createElement('img');
-    img.className = 'avatar28';
-    img.alt = name;
-    const k = getAvatarKey(table, name);
-    const cached = AVATAR_CACHE[k];
-    if (cached !== undefined) {
-      if (cached) { img.src = cached; img.style.cursor='zoom-in'; img.onclick = ()=> showBigPhoto(cached); }
-      return img;
-    }
-    get(child(ref(db), userPath(table, name))).then(snap=>{
-      const url = snap.exists() ? (snap.val().fotoUrl || '') : '';
-      AVATAR_CACHE[k] = url || null;
-      if (url) { img.src = url; img.style.cursor='zoom-in'; img.onclick=()=>showBigPhoto(url); }
-    }).catch(()=>{ AVATAR_CACHE[k]=null; });
-    return img;
-  }
+  const show = id => { $('#home').classList.add('hide'); $('#app').classList.add('hide'); $(id).classList.remove('hide'); };
+  const openOverlay = html => { $('#ovBox').innerHTML = html; $('#ov').style.display='flex'; };
+  const closeOverlay = () => { $('#ov').style.display='none'; $('#ovBox').innerHTML=''; };
 
-  // ==== CHAT TAVOLO ====
-  const chatRefFor = ()=> ref(db, `chats/${currentUser.tavolo}`);
-
-  function renderTableMsg(container, m){
-    const row = document.createElement('div');
-    row.className = 'msgRow';
-    const av = makeAvatarImg(m.user, currentUser.tavolo);
-    row.appendChild(av);
-
-    const bubble = document.createElement('div');
-    bubble.className = 'msgBubble';
-
-    const who = m.emoji ? `${m.user} ${m.emoji}` : m.user;
-    const head = document.createElement('div'); head.className='msgHeader'; head.textContent = who;
-    bubble.appendChild(head);
-
-    if (m.type === 'img' && m.url){
-      if (m.text) { const t=document.createElement('div'); t.textContent=m.text; t.style.marginBottom='6px'; bubble.appendChild(t); }
-      const img = document.createElement('img'); img.className='imgMsg'; img.src=m.url; img.alt='Foto'; img.style.cursor='zoom-in'; img.onclick=()=>showBigPhoto(m.url);
-      bubble.appendChild(img);
-    } else {
-      const txt = document.createElement('div'); txt.textContent = m.text || ''; bubble.appendChild(txt);
-    }
-    row.appendChild(bubble);
-    container.appendChild(row);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function enterChatRoom(){
-    $('chatTitle').textContent = currentUser.tavolo;
-    $('meBadge').style.display = currentUser.staff ? 'inline-block' : 'none';
-    $('btnAnnuncio').style.display = currentUser.staff ? 'inline-block' : 'none';
-    if (currentUser.fotoUrl) { $('meAvatarBtn').src = currentUser.fotoUrl; $('meAvatarBtn').title='Profilo'; }
-    else { $('meAvatarBtn').removeAttribute('src'); $('meAvatarBtn').title='Profilo'; }
-    $('chatWindow').innerHTML = '';
-    show('chat');
-
-    // listener chat tavolo
-    if (chatUnsub) chatUnsub();
-    chatUnsub = onChildAdded(chatRefFor(), (snap)=> renderTableMsg($('chatWindow'), snap.val()));
-
-    // Precarica avatar del mio tavolo
-    get(child(ref(db), `utenti/${currentUser.tavolo}`)).then(s=>{
-      if (s.exists()){
-        const users = Object.values(s.val());
-        users.forEach(u=>{ const k=getAvatarKey(currentUser.tavolo, u.nome); AVATAR_CACHE[k]=u.fotoUrl || null; });
-      }
-    });
-
-    listenAnnouncements();
-    // Tabs
-    setTab('table');
-    listenDMIndex();
-    // Brindisi incoming
-    setupBrindisiInbox();
-  }
-
-  $('chatSend').onclick = async ()=>{
-    const t = ($('chatInput').value||'').trim();
-    if (!t) return;
-    const msgRef = push(chatRefFor());
-    await set(msgRef, { type:'text', user: currentUser.nome, emoji: currentUser.emoji||null, text: t, time: Date.now() });
-    $('chatInput').value='';
+  const setActiveTab = (tab) => {
+    // default: Private
+    $('#tabDMs').classList.toggle('active', tab==='dms');
+    $('#tabTable').classList.toggle('active', tab==='table');
+    if(tab==='dms'){ $('.list').classList.remove('hide'); }
+    else { $('.list').classList.add('hide'); }
   };
 
-  // Foto in chat tavolo → suggerimento album
-  const ALBUM_URL = "https://album.example.com"; // placeholder
-  $('albumLink').href = ALBUM_URL;
-  $('chatPhoto').onclick = ()=> $('chatPhotoFile').click();
-  let pendingTablePhoto = null;
-  $('chatPhotoFile').onchange = async (e)=>{
-    const f = e.target.files?.[0]; if (!f) return;
-    pendingTablePhoto = f;
-    $('ovlAlbumHint').style.display='flex';
-  };
-  $('albumDismiss').onclick = async ()=>{
-    $('ovlAlbumHint').style.display='none';
-    if (!pendingTablePhoto) return;
-    try{
-      const jpeg = await toCompressedJpeg(pendingTablePhoto, 1200, 0.85);
-      const p = `chatImgs/${currentUser.tavolo}/${Date.now()}_${keyify(currentUser.nome)}.jpg`;
-      const r = sRef(storage, p);
-      await uploadBytes(r, jpeg, { contentType:'image/jpeg' });
-      const url = await getDownloadURL(r);
-      const msgRef = push(chatRefFor());
-      await set(msgRef, { type:'img', user: currentUser.nome, emoji: currentUser.emoji||null, url, text:'', time: Date.now() });
-      toast('Foto inviata al tavolo');
-    }catch(e){ toast('Errore foto: '+niceErr(e)); }
-    pendingTablePhoto = null;
-    $('chatPhotoFile').value='';
-  };
+  /* ====================== HOME BTN ======================= */
+  $('#btnNew').onclick = () => openNewProfile();
+  $('#btnReturn').onclick = () => openReturn();
 
-  // profilo/logout
-  $('meAvatarBtn').onclick = ()=>{
-    $('pName').textContent = currentUser.nome + (currentUser.emoji? ' '+currentUser.emoji : '');
-    $('pTable').textContent = currentUser.tavolo;
-    $('pFlags').innerHTML = '';
-    if (currentUser.staff) $('pFlags').appendChild(Object.assign(document.createElement('span'),{className:'badge',textContent:'STAFF'}));
-    if (currentUser.canReset) $('pFlags').appendChild(Object.assign(document.createElement('span'),{className:'badge',textContent:'Può resettare'}));
-    $('pFoto').src = currentUser.fotoUrl||'';
-    setupProfileEmoji(currentUser.emoji||"");
-    $('pOptOut').checked = !!currentUser.optOutBrindisi;
-    show('profile');
-  };
-  $('btnLogout').onclick = ()=>{ currentUser=null; if (chatUnsub) chatUnsub(); chatUnsub=null; show('home'); };
+  /* ====================== FAB profilo ======================= */
+  $('#fabProfile').onclick = () => openProfile();
 
-  // ==== PROFILO ====
-  $('pChangeFoto').onclick = ()=> $('pFotoInput').click();
-  $('pFotoInput').onchange = async (e)=>{
-    const f = e.target.files?.[0]; if (!f) return;
-    try{
-      const jpeg = await toCompressedJpeg(f, 900, 0.85);
-      const p = `pfp/${currentUser.tavolo}/${keyify(currentUser.nome)}.jpg`;
-      const r = sRef(storage, p);
-      await uploadBytes(r, jpeg, { contentType:'image/jpeg' });
-      const url = await getDownloadURL(r);
-      currentUser.fotoUrl = url;
-      await update(ref(db, userPath(currentUser.tavolo, currentUser.nome)), { fotoUrl:url });
-      $('pFoto').src = url; $('meAvatarBtn').src = url;
-      toast('Foto aggiornata');
-    }catch(e){ toast('Errore foto: '+niceErr(e)); }
-  };
-  function setupProfileEmoji(initial){
-    const list = $('pEmojiList');
-    [...list.querySelectorAll('.emojiRow')].forEach(btn=>{
-      btn.classList.toggle('is-selected', btn.dataset.emoji===(initial||""));
-      btn.onclick = ()=>{
-        [...list.querySelectorAll('.emojiRow')].forEach(b=>b.classList.remove('is-selected'));
-        btn.classList.add('is-selected');
-        currentUser.emoji = btn.dataset.emoji || null;
-      };
-    });
-  }
-  $('pBack').onclick = ()=> show('chat');
-  $('pSave').onclick = async ()=>{
-    try{
-      const updates = { emoji: currentUser.emoji || null, optOutBrindisi: !!$('pOptOut').checked };
-      await update(ref(db, userPath(currentUser.tavolo, currentUser.nome)), updates);
-      toast('Profilo salvato');
-      show('chat');
-    }catch(e){ $('pMsg').style.color='var(--err)'; $('pMsg').textContent='Errore: '+niceErr(e); }
-  };
+  /* ====================== Tabs / Actions ======================= */
+  $('#tabDMs').onclick = ()=>{ setActiveTab('dms'); openDefaultDM(); };
+  $('#tabTable').onclick = ()=>{ setActiveTab('table'); openTableChat(currentUser?.tavolo); };
 
-  // ==== LIGHTBOX FOTO ====
-  const ovlPhoto = $('ovlPhoto'), photoBig=$('photoBig'); $('photoClose').onclick=()=> ovlPhoto.style.display='none';
-  function showBigPhoto(url){ photoBig.src = url; ovlPhoto.style.display='flex'; }
+  $('#btnNewDM').onclick = openDMSearch;
+  $('#btnNewDM2').onclick = openDMSearch;
 
-  // ==== RICERCA (DM / Brindisi step1) ====
-  const ovlSearch = $('ovlSearch'), sQuery=$('sQuery'), sResults=$('sResults'); $('sClose').onclick=()=> ovlSearch.style.display='none';
-  async function fetchAllUsers(){
-    const snap = await get(child(ref(db), 'utenti'));
-    ALL_USERS = [];
-    if (snap.exists()){
-      const all = snap.val();
-      Object.keys(all).forEach(t=> { Object.values(all[t]).forEach(u=> ALL_USERS.push(u)); });
-    }
-  }
-  function personRow(u, onPick){
-    const foto = u.fotoUrl || '';
-    const emoji = u.emoji || '';
-    const b = document.createElement('button');
-    b.className='btn light'; b.style.textAlign='left'; b.style.display='flex'; b.style.alignItems='center'; b.style.gap='10px';
-    const avHTML = foto ? `<img class="avatar24" src="${foto}">` : `<div class="avatar24" style="display:flex;align-items:center;justify-content:center;font:600 12px/24px system-ui">${u.nome.charAt(0).toUpperCase()}</div>`;
-    b.innerHTML = `${avHTML}<div style="flex:1 1 auto">${u.nome} ${emoji} <span style="color:#666">— ${u.tavolo}</span></div>`;
-    b.onclick = ()=> onPick(u);
-    return b;
-  }
-  function tableRow(tavolo, onPick){
-    const b=document.createElement('button'); b.className='btn light'; b.style.width='100%'; b.style.textAlign='left';
-    b.textContent = `🍽️ ${tavolo}`; b.onclick = ()=> onPick(tavolo); return b;
-  }
-  function openSearchOverlay(mode){ // 'dm' | 'brindisi'
-    ovlSearch.style.display='flex';
-    sQuery.value=''; sResults.innerHTML='<div style="color:#666;padding:8px">Scrivi un nome (Es. Edoardo) o un tavolo (Es. Tavolo 3)…</div>';
-    sQuery.oninput = ()=>{
-      const q = sQuery.value.trim().toLowerCase(); sResults.innerHTML = '';
-      const tavoli = ["Tavolo 1","Tavolo 2","Tavolo 3","Tavolo 4"];
-      const tavMatch = tavoli.filter(t=> q && (t.toLowerCase().includes(q) || t.replace(/\D/g,'')===q));
-      const pplMatch = ALL_USERS.filter(u=> q && keyify(u.nome).includes(q));
+  $('#btnBrindisi').onclick = ()=> openBrindisiTarget();
+  // Annuncio solo staff
+  const isStaff = (u)=> u && (u.staff === true || keyify(u.nome)==='federico'); // semplice: sposo + flag staff
+  $('#btnAnnuncio').onclick = ()=> openAnnuncio();
 
-      if (tavMatch.length){
-        const h=document.createElement('div'); h.style.margin='8px 0 4px'; h.style.fontWeight='600'; h.textContent='Tavoli trovati';
-        sResults.appendChild(h);
-        tavMatch.forEach(t=> sResults.appendChild(tableRow(t, picked=>{
-          if (mode==='dm') { ovlSearch.style.display='none'; openPickPersonForTable(picked); }
-          else { openBrindisiPickForTable(picked); }
-        })));
-      }
-      if (pplMatch.length){
-        const h2=document.createElement('div'); h2.style.margin='8px 0 4px'; h2.style.fontWeight='600'; h2.textContent='Persone trovate';
-        sResults.appendChild(h2);
-        pplMatch.forEach(u=> sResults.appendChild(personRow(u, picked=>{
-          ovlSearch.style.display='none';
-          if (mode==='dm') openDMChatFromSearch(picked);
-          else openBrindisiStep2({type:'user', user:picked});
-        })));
-      }
-      if (!tavMatch.length && !pplMatch.length && q){ sResults.innerHTML='<div style="color:#666;padding:8px">Nessun risultato.</div>'; }
-    };
-  }
+  /* ====================== LOGIN / PROFILO ======================= */
 
-  // ==== DM (chat private) ====
-  const dmWindow=$('dmWindow'), dmInput=$('dmInput');
-  $('btnNewDM').onclick = async ()=>{ await fetchAllUsers(); openSearchOverlay('dm'); };
+  function openNewProfile(){
+    const optionsTables = TABLES.map(t=>`<option value="${t}">Tavolo ${t}</option>`).join('');
+    openOverlay(`
+      <div class="modal">
+        <h3>Crea nuovo profilo</h3>
+        <div class="col">
+          <input id="iNome" type="text" placeholder="Nome (es. Giulia R.)">
+          <div class="row">
+            <input id="iPin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN (4 cifre)" style="max-width:180px">
+            <select id="iTav" style="max-width:180px"><option value="">Seleziona tavolo</option>${optionsTables}</select>
+          </div>
 
-  function dmIdFor(a,b){ const A=keyify(a), B=keyify(b); return (A<B)? `${A}__${B}` : `${B}__${A}`; }
-  async function openPickPersonForTable(tavolo){
-    await fetchAllUsers();
-    ovlSearch.style.display='flex';
-    sQuery.value = '';
-    sResults.innerHTML = `<div style="font-weight:600;margin:8px 6px">🍽️ ${tavolo}</div>`;
-    ALL_USERS.filter(u=> u.tavolo===tavolo && keyify(u.nome)!==keyify(currentUser.nome))
-      .forEach(u=> sResults.appendChild(personRow(u, picked=>{ ovlSearch.style.display='none'; openDMChatFromSearch(picked); })));
-  }
-  async function openDMChatFromSearch(u){
-    const id = dmIdFor(currentUser.nome, u.nome);
-    await set(ref(db, `dmIndex/${keyify(currentUser.nome)}/${id}`), { otherName:u.nome, otherTable:u.tavolo, lastTime:Date.now() });
-    await set(ref(db, `dmIndex/${keyify(u.nome)}/${id}`),               { otherName:currentUser.nome, otherTable:currentUser.tavolo, lastTime:Date.now() });
-    openDMChat({ id, otherName:u.nome, otherTable:u.tavolo });
-  }
+          <div class="sep"></div>
 
-  function setTab(active){ // 'table' | 'dms'
-    const onTable = active==='table';
-    $('tabTable').classList.toggle('active', onTable);
-    $('tabDMs').classList.toggle('active', !onTable);
-    $('chatWindow').style.display = onTable ? 'block' : 'none';
-    $('chatInput').closest('.row').style.display = onTable ? 'flex' : 'none';
-    $('dmList').style.display = onTable ? 'none' : 'flex';
-    $('btnNewDM').style.display = onTable ? 'none' : 'inline-block';
-  }
-  $('tabTable').onclick = ()=> setTab('table');
-  $('tabDMs').onclick   = ()=> { setTab('dms'); refreshDMList(); };
+          <div class="pf-emoji">
+            <button class="btn small" data-e="💍">💍</button><div>Impegnato/a</div>
+            <button class="btn small" data-e="💬">💬</button><div>Disponibile a chiacchierare</div>
+            <button class="btn small" data-e="🎉">🎉</button><div>Voglia di far festa</div>
+            <button class="btn small" data-e="✨">✨</button><div>Sorprendimi</div>
+          </div>
+          <div class="hint">Scegli uno status (opzionale).</div>
 
-  async function ensureAllUsers(){ if (!ALL_USERS.length) await fetchAllUsers(); }
-  function dmRow(meta){
-    const b = document.createElement('button');
-    b.className = 'btn light';
-    b.style.textAlign = 'left';
-    b.style.width = '100%';
-    b.style.display = 'flex';
-    b.style.alignItems = 'center';
-    b.style.gap = '10px';
+          <div class="row">
+            <label class="row" style="gap:8px;align-items:center">
+              <input id="iOpt" type="checkbox"> 🙈 Non ricevere sfide private (brindisi)
+            </label>
+          </div>
 
-    const hit = ALL_USERS.find(u => keyify(u.nome)===keyify(meta.otherName));
-    const emoji = hit?.emoji || '';
-    const foto  = hit?.fotoUrl || '';
-    const avHTML = foto ? `<img class="avatar24" src="${foto}" alt="">` :
-      `<div class="avatar24" style="display:flex;align-items:center;justify-content:center;font:600 12px/24px system-ui">${(meta.otherName||'?').trim().charAt(0).toUpperCase()}</div>`;
-    const when = meta.lastTime ? new Date(meta.lastTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-
-    b.innerHTML = `
-      ${avHTML}
-      <div style="flex:1 1 auto; min-width:0">
-        <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-          ${meta.otherName} ${emoji}
-          <span style="color:#666; font-weight:400">— ${meta.otherTable||''}</span>
+          <div class="row" style="justify-content:flex-end">
+            <button class="btn ghost" id="x">Chiudi</button>
+            <button class="btn primary" id="ok">Crea</button>
+          </div>
         </div>
       </div>
-      <div style="color:#999; margin-left:8px">${when}</div>
-    `;
-    b.onclick = ()=> openDMChat(meta);
-    return b;
-  }
-  function refreshDMListUI(indexObj){
-    const box = $('dmList');
-    box.innerHTML = '';
-    const entries = Object.entries(indexObj||{}).map(([id,m])=> ({ id, ...m }));
-    entries.sort((a,b)=> (b.lastTime||0)-(a.lastTime||0));
-    if (!entries.length){
-      box.innerHTML = `<div class="msg">Nessuna chat privata. Premi <strong>➕💬</strong> per iniziarne una.</div>`;
-      return;
-    }
-    entries.forEach(m => box.appendChild(dmRow(m)));
-  }
-  function listenDMIndex(){
-    if (dmIndexUnsub) dmIndexUnsub();
-    const myKey = keyify(currentUser.nome);
-    dmIndexUnsub = onValue(ref(db, `dmIndex/${myKey}`), async (snap)=>{
-      await ensureAllUsers();
-      refreshDMListUI(snap.val()||{});
-    });
-  }
-  function refreshDMList(){
-    const myKey = keyify(currentUser.nome);
-    get(ref(db, `dmIndex/${myKey}`)).then(async (snap)=>{
-      await ensureAllUsers();
-      refreshDMListUI(snap.val()||{});
-    });
-  }
+    `);
+    let selEmoji = null;
+    $$('.pf-emoji .btn').forEach(b=> b.onclick=()=>{ selEmoji = b.dataset.e; $$('.pf-emoji .btn').forEach(x=>x.style.outline=''); b.style.outline='2px solid #111'; });
 
-  function openDMChat(meta){
-    if (dmUnsub) { dmUnsub(); dmUnsub=null; }
-    $('dmTitle').textContent = meta.otherName;
-    dmWindow.innerHTML='';
-    show('dmChat');
-    const roomRef = ref(db, `privateChats/${meta.id}`);
-
-    dmUnsub = onChildAdded(roomRef, async (snap)=>{
-      const m = snap.val();
-      // riuso il renderer "table" (va benissimo anche nei DM)
-      renderTableMsg(dmWindow, m);
-      const now = m.time || Date.now();
-      await update(ref(db, `dmIndex/${keyify(currentUser.nome)}/${meta.id}`), { lastTime: now });
-      await update(ref(db, `dmIndex/${keyify(meta.otherName)}/${meta.id}`),      { lastTime: now });
-    });
-
-    $('dmSend').onclick = async ()=>{
-      const text = (dmInput.value||'').trim(); if (!text) return;
-      const r = push(roomRef);
-      const now = Date.now();
-      await set(r, { type:'text', user: currentUser.nome, emoji: currentUser.emoji||null, text, time: now });
-      await update(ref(db, `dmIndex/${keyify(currentUser.nome)}/${meta.id}`), { lastTime: now });
-      dmInput.value='';
+    $('#x').onclick = closeOverlay;
+    $('#ok').onclick = async ()=>{
+      const nome = $('#iNome').value.trim();
+      const pin = $('#iPin').value.trim();
+      const tav = $('#iTav').value.trim();
+      const opt = $('#iOpt').checked;
+      if(!nome || !pin.match(/^\d{4}$/) || !tav){ toast('Compila nome, PIN e tavolo', false); return; }
+      const key = keyify(nome);
+      const exists = await get(ref(db, `users/${key}`));
+      if(exists.exists()){ toast('Nome già usato: aggiungi un\'iniziale del cognome', false); return; }
+      const user = { nome, pin, tavolo:`${tav}`, emoji: selEmoji||null, optOutBrindisi: !!opt, pfp:null, staff:false, createdAt: now() };
+      await set(ref(db, `users/${key}`), user);
+      currentUser = user;
+      closeOverlay();
+      afterLogin();
     };
-    $('dmPhoto').onclick = ()=> $('dmPhotoFile').click();
-    $('dmPhotoFile').onchange = async (e)=>{
-      const f = e.target.files?.[0]; if (!f) return;
+  }
+
+  function openReturn(){
+    const optionsTables = TABLES.map(t=>`<option value="${t}">Tavolo ${t}</option>`).join('');
+    openOverlay(`
+      <div class="modal">
+        <h3>Rientra nel tuo profilo</h3>
+        <div class="col">
+          <input id="rNome" type="text" placeholder="Nome">
+          <div class="row">
+            <input id="rPin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN (4 cifre)" style="max-width:180px">
+            <select id="rTav" style="max-width:180px"><option value="">Seleziona tavolo</option>${optionsTables}</select>
+          </div>
+          <div class="row" style="justify-content:flex-end">
+            <button class="btn ghost" id="x">Chiudi</button>
+            <button class="btn primary" id="ok">Entra</button>
+          </div>
+        </div>
+      </div>
+    `);
+    $('#x').onclick = closeOverlay;
+    $('#ok').onclick = async ()=>{
+      const nome = $('#rNome').value.trim(); const pin=$('#rPin').value.trim(); const tav=$('#rTav').value.trim();
+      if(!nome || !pin.match(/^\d{4}$/) || !tav){ toast('Compila nome, PIN e tavolo', false); return; }
+      const snap = await get(ref(db, `users/${keyify(nome)}`));
+      if(!snap.exists()){ toast('Profilo non trovato', false); return; }
+      const u = snap.val();
+      if(u.pin!==pin || `${u.tavolo}`!==`${tav}`){ toast('Dati non corretti', false); return; }
+      currentUser = u;
+      closeOverlay();
+      afterLogin();
+    };
+  }
+
+  async function openProfile(){
+    if(!currentUser){ return; }
+    const u = currentUser;
+    openOverlay(`
+      <div class="modal profile">
+        <div class="pf-header">
+          <div class="avatar" id="pfAvatar">${initials(u.nome)}</div>
+          <div><div style="font-weight:700">${u.nome}</div><div class="hint">Tavolo ${u.tavolo}</div></div>
+        </div>
+
+        <div class="col">
+          <label class="hint">Cambia/aggiungi foto profilo</label>
+          <input id="pfFile" type="file" accept="image/*" capture="environment">
+          <div class="sep"></div>
+
+          <label class="hint">Emoji / Status</label>
+          <div class="pf-emoji">
+            <button class="btn small" data-e="💍">💍</button><div>Impegnato/a</div>
+            <button class="btn small" data-e="💬">💬</button><div>Disponibile a chiacchierare</div>
+            <button class="btn small" data-e="🎉">🎉</button><div>Voglia di far festa</div>
+            <button class="btn small" data-e="✨">✨</button><div>Sorprendimi</div>
+          </div>
+
+          <label class="row" style="gap:8px;align-items:center"><input id="pfOpt" type="checkbox"> 🙈 Non ricevere sfide private</label>
+
+          <div class="row" style="justify-content:flex-end">
+            <button class="btn ghost" id="x">Indietro</button>
+            <button class="btn primary" id="save">Salva</button>
+          </div>
+          <div id="pfMsg" class="hint"></div>
+        </div>
+      </div>
+    `);
+    // preselezione
+    $$('.pf-emoji .btn').forEach(b=>{
+      if(b.dataset.e===u.emoji){ b.style.outline='2px solid #111'; }
+      b.onclick=()=>{ $$('.pf-emoji .btn').forEach(x=>x.style.outline=''); b.style.outline='2px solid #111'; u.emoji=b.dataset.e; };
+    });
+    $('#pfOpt').checked = !!u.optOutBrindisi;
+
+    $('#x').onclick = closeOverlay;
+    $('#save').onclick = async ()=>{
       try{
-        const jpeg = await toCompressedJpeg(f, 1200, 0.85);
-        const p = `dmImgs/${meta.id}/${Date.now()}_${keyify(currentUser.nome)}.jpg`;
-        const r = sRef(storage, p);
-        await uploadBytes(r, jpeg, { contentType:'image/jpeg' });
-        const url = await getDownloadURL(r);
-        const mref = push(roomRef);
-        const now = Date.now();
-        await set(mref, { type:'img', user: currentUser.nome, emoji: currentUser.emoji||null, url, text:'', time: now });
-        await update(ref(db, `dmIndex/${keyify(currentUser.nome)}/${meta.id}`), { lastTime: now });
-        toast('Foto inviata');
-      }catch(e){ toast('Errore foto: '+niceErr(e)); }
-      e.target.value='';
+        $('#pfMsg').textContent = 'Salvo…';
+        const files = $('#pfFile').files;
+        if(files && files[0]){
+          const file = files[0];
+          const p = `pfp/${u.tavolo}/${keyify(u.nome)}.jpg`;
+          const r = sRef(storage, p);
+          await uploadBytes(r, file);
+          u.pfp = await getDownloadURL(r);
+        }
+        u.optOutBrindisi = $('#pfOpt').checked;
+        await update(ref(db, `users/${keyify(u.nome)}`), { emoji:u.emoji||null, optOutBrindisi: u.optOutBrindisi, pfp: u.pfp||null });
+        currentUser = (await get(ref(db, `users/${keyify(u.nome)}`))).val();
+        fillMeUI();
+        $('#pfMsg').innerHTML = '<span class="ok">Salvato</span>';
+        setTimeout(closeOverlay, 700);
+      }catch(e){
+        $('#pfMsg').innerHTML = '<span class="err">Errore salvataggio</span>';
+      }
     };
-
-    $('dmc_back').onclick = ()=>{ if (dmUnsub) dmUnsub(); dmUnsub=null; show('chat'); setTab('dms'); refreshDMList(); };
   }
 
-  // ==== BRINDISI ====
-  const BR_PERSONA = [
-    "Brinda in rima agli sposi","Brinda cantando un ritornello d’amore",
-    "Brinda come un telecronista","Brinda in dialetto (o inventane uno!)",
-    "Brinda come un sommelier","Brinda ringraziando i genitori",
-    "Brinda a tema viaggio","Brinda come un pirata dei Caraibi"
-  ];
-  const BR_TAVOLO = [
-    "Tutto il tavolo in piedi: fazzoletti al vento",
-    "Brindisi a staffetta: una parola a testa (min 3)","Brindisi cantato tutti insieme",
-    "Brindisi con rima finale urlata da tutti","Brindisi a ritmo di battiti di mani"
-  ];
-  function canSendBrindisi(){
-    const last = +localStorage.getItem('cm_lastSend')||0;
-    const left = 60000 - (Date.now()-last);
-    return { ok: left<=0, left };
-  }
-  function markSendBrindisi(){ localStorage.setItem('cm_lastSend', String(Date.now())); }
+  function initials(n){ return (n||'?').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase(); }
 
-  $('btnBrindisi').onclick = async ()=>{
-    const cd = canSendBrindisi();
-    if (!cd.ok){ toast(`Aspetta ${Math.ceil(cd.left/1000)}s per un altro brindisi`); return; }
-    await fetchAllUsers();
-    openSearchOverlay('brindisi'); // Step 1: target
-  };
-
-  const ovlBrStep2 = $('ovlBrStep2'), br2Title=$('br2_title'), br2Sub=$('br2_sub'), br2Label=$('br2_label'),
-        br2List=$('br2_list'), br2More=$('br2_more'), br2Free=$('br2_free'), br2Msg=$('br2_msg');
-  $('br2_cancel').onclick = ()=> ovlBrStep2.style.display='none';
-  let br2Target=null;
-
-  function renderBr2Suggestions(kind){
-    const pool = kind==='user' ? BR_PERSONA : BR_TAVOLO;
-    const pick = pool.slice().sort(()=>Math.random()-0.5).slice(0,4);
-    br2List.innerHTML = '';
-    pick.forEach(txt=>{
-      const b=document.createElement('button'); b.className='br-sugg'; b.textContent=txt; b.onclick=()=> br2Free.value=txt;
-      br2List.appendChild(b);
-    });
-  }
-  function openBrindisiStep2(target){
-    br2Target = target; br2Free.value=''; br2Msg.textContent='';
-    if (target.type==='user'){
-      const u=target.user; br2Title.textContent = `🍾 Brindisi per ${u.nome} ${u.emoji||''} — ${u.tavolo}`;
-      br2Sub.textContent='Scegli una sfida oppure scrivi la tua.'; br2Label.textContent='Proposte per te';
-      renderBr2Suggestions('user');
-    } else {
-      br2Title.textContent = `🍾 Brindisi per ${target.tavolo}`;
-      br2Sub.textContent='Scegli una sfida di gruppo oppure scrivi la tua.'; br2Label.textContent='Proposte per il tavolo';
-      renderBr2Suggestions('table');
-    }
-    ovlBrStep2.style.display='flex';
-  }
-  $('br2_more').onclick = ()=> renderBr2Suggestions(br2Target?.type==='user'?'user':'table');
-  $('br2_send').onclick = async ()=>{
-    const cd = canSendBrindisi(); if (!cd.ok){ br2Msg.textContent=`Aspetta ${Math.ceil(cd.left/1000)}s`; return; }
-    const testo = (br2Free.value||'').trim(); if (!testo){ br2Msg.textContent='Scegli una sfida o scrivi la tua.'; return; }
-    if (br2Target?.type==='user'){
-      const u = br2Target.user;
-      if (u.optOutBrindisi){ br2Msg.textContent='Questo ospite non riceve sfide private.'; return; }
-      await startBrindisiToUser(u, testo);
-    } else if (br2Target?.type==='table'){
-      await startBrindisiToTable(br2Target.tavolo, testo);
-    }
-    ovlBrStep2.style.display='none'; toast('Brindisi inviato! 🍾');
-  };
-  async function startBrindisiToUser(u, testo){
-    const idRef = push(ref(db, 'brindisi/all'));
-    const payload = { id:idRef.key, from:{nome:currentUser.nome,tavolo:currentUser.tavolo,emoji:currentUser.emoji||null},
-      to:{type:'user', tavolo:u.tavolo, nome:u.nome}, text:testo, status:'pending', createdAt:Date.now() };
-    await set(idRef, payload);
-    await set(ref(db, `brindisi/inboxUser/${u.tavolo}/${keyify(u.nome)}/${payload.id}`), payload);
-    markSendBrindisi();
-  }
-  async function startBrindisiToTable(tavolo, testo){
-    const idRef = push(ref(db, 'brindisi/all'));
-    const payload = { id:idRef.key, from:{nome:currentUser.nome,tavolo:currentUser.tavolo,emoji:currentUser.emoji||null},
-      to:{type:'table', tavolo, nome:null}, text:testo, status:'pending', createdAt:Date.now() };
-    await set(idRef, payload);
-    await set(ref(db, `brindisi/inboxTable/${tavolo}/${payload.id}`), payload);
-    markSendBrindisi();
+  /* ====================== Dopo login ======================= */
+  function afterLogin(){
+    show('#app');
+    $('#fabProfile').classList.remove('hide');
+    $('#btnAnnuncio').classList.toggle('hide', !isStaff(currentUser));
+    fillMeUI();
+    setActiveTab('dms');     // **apriamo sulle Private**
+    openDefaultDM();         // seleziona ultima/nessuna
+    // listener elenco DM
+    listenDMIndex();
   }
 
-  // Brindisi ricevuti
-  let brUserUnsub = null, brTableUnsub = null;
-  const ovlBrRecv = $('ovlBrRecv'), brRecvTitle=$('brRecvTitle'), brRecvText=$('brRecvText');
-  let currentBrInbox = null;
+  function fillMeUI(){
+    $('#meBadge').textContent = `${currentUser.nome} ${currentUser.emoji||''} — Tavolo ${currentUser.tavolo}`;
+    $('#meAvatar').textContent = '';
+    $('#meAvatar').style.background = '#ddd';
+    $('#meAvatar').innerText = (currentUser.pfp?'':initials(currentUser.nome));
+    if(currentUser.pfp){ $('#meAvatar').style.backgroundImage=`url(${currentUser.pfp})`; $('#meAvatar').style.backgroundSize='cover'; }
+  }
 
-  function setupBrindisiInbox(){
-    if (brUserUnsub) brUserUnsub();
-    if (brTableUnsub) brTableUnsub();
-    brUserUnsub = onChildAdded(
-      ref(db, `brindisi/inboxUser/${currentUser.tavolo}/${keyify(currentUser.nome)}`),
-      snap => showBrindisiRecv(snap.key, snap.val())
-    );
-    brTableUnsub = onChildAdded(
-      ref(db, `brindisi/inboxTable/${currentUser.tavolo}`),
-      snap => showBrindisiRecv(snap.key, snap.val())
-    );
-  }
-  function showBrindisiRecv(id, payload){
-    const from = payload.from;
-    const who  = `${from.nome} ${from.emoji||''} — ${from.tavolo}`;
-    brRecvTitle.textContent = "🍾 Proposta di brindisi";
-    brRecvText.textContent  = `${who} ti propone: “${payload.text}”`;
-    currentBrInbox = { id, payload };
-    ovlBrRecv.style.display = 'flex';
-  }
-  async function clearInboxEntry(box){
-    const p = (box.payload.to.type === 'user')
-      ? `brindisi/inboxUser/${currentUser.tavolo}/${keyify(currentUser.nome)}/${box.id}`
-      : `brindisi/inboxTable/${currentUser.tavolo}/${box.id}`;
-    await set(ref(db, p), null);
-  }
-  $('brRecvAccept').onclick = async ()=>{
-    if (!currentBrInbox) return;
-    await update(ref(db, `brindisi/all/${currentBrInbox.id}`), { status:'accepted', acceptedAt:Date.now() });
-    await clearInboxEntry(currentBrInbox);
-    currentBrInbox = null;
-    ovlBrRecv.style.display='none';
-    toast('Cin cin! 🍾');
-  };
-  $('brRecvDecline').onclick = async ()=>{
-    if (!currentBrInbox) return;
-    await update(ref(db, `brindisi/all/${currentBrInbox.id}`), { status:'declined', declinedAt:Date.now() });
-    await clearInboxEntry(currentBrInbox);
-    currentBrInbox = null;
-    ovlBrRecv.style.display='none';
-  };
+  /* ====================== DM: elenco + apertura ======================= */
 
-  // ==== ANNUNCI STAFF ====
-  const ovlAnnuncioSend = $('ovlAnnuncioSend'), annText=$('annText'), annMsg=$('annMsg');
-  $('btnAnnuncio').onclick = ()=>{
-    if (!currentUser?.staff){ toast('Solo lo staff può inviare annunci'); return; }
-    annText.value=''; annMsg.textContent=''; ovlAnnuncioSend.style.display='flex';
-  };
-  $('annCancel').onclick = ()=> ovlAnnuncioSend.style.display='none';
-  $('annSend').onclick = async ()=>{
-    const t=(annText.value||'').trim(); if (!t){ annMsg.style.color='var(--err)'; annMsg.textContent='Scrivi un annuncio.'; return; }
-    const r=push(ref(db,'annunci/all'));
-    await set(r, { text:t, by:currentUser.nome, time:Date.now() });
-    ovlAnnuncioSend.style.display='none';
-    toast('Annuncio inviato');
-  };
-  // ricezione annunci
-  const ovlAnnuncioShow = $('ovlAnnuncioShow'), annBody=$('annBody'); $('annOk').onclick=()=> ovlAnnuncioShow.style.display='none';
-  let annOnce = false;
-  function listenAnnouncements(){
-    if (annOnce) return; annOnce=true;
-    onChildAdded(ref(db,'annunci/all'), (snap)=>{
-      const a=snap.val();
-      annBody.textContent = a.text;
-      ovlAnnuncioShow.style.display='flex';
-      setTimeout(()=> (ovlAnnuncioShow.style.display='none'), 60000);
+  function listenDMIndex(){
+    const container = $('#dmItems');
+    container.innerHTML = '';
+    const path = `dmIndex/${keyify(currentUser.nome)}`;
+    onValue(ref(db, path), (snap)=>{
+      container.innerHTML='';
+      const val = snap.val()||{};
+      const rows = Object.entries(val).sort((a,b)=> (b[1].ts||0)-(a[1].ts||0));
+      if(!rows.length){ container.innerHTML = `<div class="hint" style="padding:6px 8px">Nessuna chat privata. Premi “Nuova chat”.</div>`; return; }
+      rows.forEach(([other, meta])=>{
+        const row = document.createElement('div'); row.className='dm-item';
+        row.innerHTML = `<div class="avatar">${(meta.pfp?'<img src="'+meta.pfp+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>':initials(other))}</div>
+                         <div><div style="font-weight:700">${other} ${meta.emoji||''}</div>
+                         <div class="hint" style="font-size:12px">Ultimo: ${meta.last||''}</div></div>`;
+        row.onclick = ()=> openDMChat(other);
+        container.appendChild(row);
+      });
     });
   }
 
+  async function openDefaultDM(){
+    $('#roomTitle').textContent='Chat private';
+    $('#roomSub').textContent='Apri o crea una chat';
+    $('#chatWindow').innerHTML = `<div class="hint" style="padding:12px">Seleziona una chat dall’elenco o premi “Nuova chat privata”.</div>`;
+    $('#msgInput').value=''; $('#msgInput').disabled=true; $('#btnSend').disabled=true;
+    // Nessun listener DM attivo
+    Object.values(dmUnsubs).forEach(unsub=>unsub && unsub()); dmUnsubs={};
+    // Chiudi listener tavolo se c’era
+    if(tableUnsub){ tableUnsub(); tableUnsub=null; }
+  }
+
+  async function openDMChat(otherName){
+    const you = currentUser.nome; const other = otherName;
+    const id = dmIdFor(you, other);
+    currentRoom = { type:'dm', id, title: other, otherUser: other };
+    setActiveTab('dms');
+    $('#roomTitle').textContent = other;
+    $('#roomSub').textContent = 'Chat privata';
+    $('#roomAvatar').textContent = initials(other);
+    $('#msgInput').disabled=false; $('#btnSend').disabled=false;
+    $('#chatWindow').innerHTML='';
+
+    // chiudi tavolo & DM listeners precedenti
+    if(tableUnsub){ tableUnsub(); tableUnsub=null; }
+    if(dmUnsubs[id]){ dmUnsubs[id](); }
+
+    // ascolta messaggi DM
+    const msgsRef = ref(db, `dms/${id}/messages`);
+    dmUnsubs[id] = onChildAdded(msgsRef, (snap)=>{
+      const m = snap.val(); renderMsg(m, m.from===currentUser.nome?'you':'other');
+    });
+
+    // aggiorna index per ordinamento
+    await update(ref(db, `dmIndex/${keyify(currentUser.nome)}/${other}`), { ts: now() });
+  }
+
+  function renderMsg(m, who){
+    const row = document.createElement('div');
+    row.className = 'msg '+(m.type==='sys'?'sys': who==='you'?'you':'');
+    const av = document.createElement('div'); av.className='avatar';
+    av.textContent = initials(m.from||'S');
+    if(m.pfp){ av.innerHTML = `<img src="${m.pfp}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`; }
+    const bub = document.createElement('div'); bub.className='bubble';
+    if(m.type==='sys' && m.action==='reply_link'){
+      bub.innerHTML = `<div><b>${m.title}</b></div>
+                       <div class="hint" style="margin:6px 0">${m.text}</div>
+                       <button class="btn small" id="reply_${m.fromKey}">Rispondi in privato</button>`;
+      setTimeout(()=>{
+        const b = document.getElementById(`reply_${m.fromKey}`);
+        if(b) b.onclick = ()=> openDMChat(m.from);
+      },0);
+    }else{
+      bub.textContent = m.text||'';
+    }
+    row.appendChild(av); row.appendChild(bub);
+    $('#chatWindow').appendChild(row);
+    $('#chatWindow').scrollTop = $('#chatWindow').scrollHeight;
+  }
+
+  /* Invio messaggio */
+  $('#btnSend').onclick = async ()=>{
+    const txt = $('#msgInput').value.trim(); if(!txt) return;
+    $('#msgInput').value='';
+    if(!currentRoom) return;
+
+    if(currentRoom.type==='dm'){
+      const id = currentRoom.id;
+      const m = { text: txt, from: currentUser.nome, pfp: currentUser.pfp||null, ts: now() };
+      await push(ref(db, `dms/${id}/messages`), m);
+      // aggiorna indici
+      await update(ref(db, `dmIndex/${keyify(currentUser.nome)}/${currentRoom.otherUser}`), { ts:m.ts, last:txt, emoji:null, pfp:null });
+      await update(ref(db, `dmIndex/${keyify(currentRoom.otherUser)}/${currentUser.nome}`), { ts:m.ts, last:txt, emoji:currentUser.emoji||null, pfp: currentUser.pfp||null });
+
+    }else if(currentRoom.type==='table'){
+      const t = currentUser.tavolo;
+      const m = { text: txt, from: currentUser.nome, pfp: currentUser.pfp||null, ts: now() };
+      await push(ref(db, `tables/${t}/messages`), m);
+    }
+  };
+
+  /* ====================== Tavolo ======================= */
+
+  function openTableChat(tableId){
+    setActiveTab('table');
+    currentRoom = { type:'table', id:`${tableId}`, title:`Tavolo ${tableId}` };
+    $('#roomTitle').textContent = `Tavolo ${tableId}`;
+    $('#roomSub').textContent = 'Chat del tavolo';
+    $('#roomAvatar').textContent = 'T';
+    $('#msgInput').disabled=false; $('#btnSend').disabled=false;
+    $('#chatWindow').innerHTML='';
+
+    // chiudi dm listeners
+    Object.values(dmUnsubs).forEach(un=>un && un()); dmUnsubs={};
+    // attach tavolo
+    if(tableUnsub){ tableUnsub(); }
+    const path = `tables/${tableId}/messages`;
+    tableUnsub = onChildAdded(ref(db, path), (snap)=>{
+      const m = snap.val();
+      const who = m.from===currentUser.nome?'you':'other';
+      renderMsg(m, who);
+    });
+
+    // Mostra eventuali messaggi “esterni” come normali (con pulsante Rispondi)
+    const extPath = `tables/${tableId}/incoming`;
+    onChildAdded(ref(db, extPath), (snap)=>{
+      const e = snap.val();
+      // messaggio “di sistema” con bottone
+      const sys = {
+        type:'sys', action:'reply_link', from: e.from, fromKey:keyify(e.from),
+        title:`Messaggio da ${e.from} ${e.emoji||''} — Tavolo ${e.tableFrom||'?'}`,
+        text:e.text
+      };
+      renderMsg(sys, 'other');
+    });
+  }
+
+  // invio “messaggio al tavolo” da utente esterno (usato dal picker Cerca)
+  async function sendToTableAsExternal(tableId, text, fromMeta){
+    const data = { text, from: fromMeta.nome, emoji: fromMeta.emoji||null, tableFrom: fromMeta.tavolo, ts: now() };
+    await push(ref(db, `tables/${tableId}/incoming`), data);
+  }
+
+  /* ====================== Cerca / Nuova Chat ======================= */
+
+  function openDMSearch(){
+    openOverlay(renderSearchModal('dm'));
+  }
+  function openBrindisiTarget(){
+    openOverlay(renderSearchModal('brindisi'));
+  }
+
+  function renderSearchModal(mode){
+    const title = mode==='brindisi' ? 'Cerca ospite o tavolo per Brindisi' : 'Cerca ospite o tavolo';
+    const listTables = TABLES.map(t=>`<div class="dm-item" data-t="t" data-id="${t}"><div class="avatar">T</div><div><b>Tavolo ${t}</b></div></div>`).join('');
+    return `
+      <div class="modal">
+        <h3>${title}</h3>
+        <input id="q" class="search" placeholder="Cerca nome o tavolo…" />
+        <div style="max-height:50vh;overflow:auto">
+          <h3>Tavoli</h3>
+          <div id="tList">${listTables}</div>
+          <div class="sep"></div>
+          <h3>Ospiti</h3>
+          <div id="uList"><div class="hint" style="padding:6px 8px">Digita per cercare…</div></div>
+        </div>
+        <div class="row" style="justify-content:flex-end;margin-top:10px">
+          <button class="btn ghost" id="close">Chiudi</button>
+        </div>
+      </div>
+    `;
+  }
+
+  $('#ov').addEventListener('click', (e)=>{ if(e.target.id==='ov'){ closeOverlay(); }});
+
+  // deleghe overlay
+  document.body.addEventListener('click', async (e)=>{
+    if(!$('#ov').style.display || $('#ov').style.display==='none') return;
+
+    const t = e.target;
+
+    if(t.id==='close') { closeOverlay(); return; }
+
+    // ricerca (digitazione)
+    if(t.id==='q' || t.closest('#q')){
+      $('#q').oninput = async ()=>{
+        const q = $('#q').value.toLowerCase().trim();
+        const uList = $('#uList');
+        if(!q){ uList.innerHTML = `<div class="hint" style="padding:6px 8px">Digita per cercare…</div>`; return; }
+        // fetch utenti (semplice, tutti)
+        const snap = await get(ref(db, `users`));
+        const all = snap.val()||{};
+        const rows = Object.values(all).filter(u => keyify(u.nome).includes(keyify(q)) || (`tavolo ${u.tavolo}`).includes(q));
+        if(!rows.length){ uList.innerHTML = `<div class="hint" style="padding:6px 8px">Nessun risultato</div>`; return;}
+        uList.innerHTML = rows.map(u=>(
+          `<div class="dm-item" data-t="u" data-id="${u.nome}">
+             <div class="avatar">${u.pfp?`<img src="${u.pfp}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`:initials(u.nome)}</div>
+             <div><b>${u.nome}</b> ${u.emoji||''}<div class="hint">Tavolo ${u.tavolo}</div></div>
+           </div>`
+        )).join('');
+      };
+    }
+
+    // click risultato (tavolo / utente)
+    const row = t.closest('.dm-item');
+    if(row){
+      const typ = row.dataset.t; const val = row.dataset.id;
+      // Se overlay è “brindisi”, apri picker brindisi
+      if($('#ovBox').querySelector('h3')?.textContent.includes('Brindisi')){
+        if(typ==='u'){ openBrindisiPick('user', val); }
+        else{ openBrindisiPick('table', val); }
+        return;
+      }
+      // Altrimenti è “nuova chat / messaggio”
+      if(typ==='u'){
+        closeOverlay(); openDMChat(val);
+      }else{
+        // scrivi al tavolo (messaggio che resta nel tavolo)
+        const name = prompt('Scrivi il messaggio per Tavolo '+val+' (comparirà nella loro chat):');
+        if(!name) return;
+        await sendToTableAsExternal(val, name, currentUser);
+        toast('Messaggio inviato al Tavolo '+val);
+      }
+    }
+  });
+
+  /* ====================== Brindisi ======================= */
+
+  // cool-down per-sender (60s) + anti-spam semplice per table/utente target
+  const cooldownSend = new Map();
+  function canSend(kind, target){
+    const key = `${kind}:${target}:${keyify(currentUser.nome)}`;
+    const last = cooldownSend.get(key)||0;
+    if(now()-last < 60000){ return false; }
+    cooldownSend.set(key, now()); return true;
+  }
+
+  function openBrindisiPick(kind, target){
+    const SUG = kind==='table'
+      ? ['Tutti in piedi e brindisi con fazzoletto!', 'Brindisi per gli sposi in rima', 'Brindisi al tavolo accanto', 'Brindisi dialettale!']
+      : ['Brindisi in rima', 'Brindisi guardandoci negli occhi', 'Brindisi “capitano mio capitano” (in piedi sulla sedia 😅)', 'Brindisi con citazione canzone'];
+
+    openOverlay(`
+      <div class="modal">
+        <h3>Proponi brindisi a ${kind==='table'?'Tavolo '+target: target}</h3>
+        <div class="grid2">
+          ${SUG.slice(0,4).map((s,i)=>`<button class="btn ghost" data-sel="s${i}">${s}</button>`).join('')}
+        </div>
+        <div class="mt16"><input id="free" class="search" placeholder="Oppure scrivi la tua sfida…"/></div>
+        <div class="row" style="justify-content:flex-end;margin-top:10px">
+          <button class="btn ghost" id="x">Annulla</button>
+          <button class="btn primary" id="sendB">Invia</button>
+        </div>
+      </div>
+    `);
+
+    let chosen = null;
+    $$('[data-sel]').forEach(b=> b.onclick=()=>{ chosen=b.textContent; $$('[data-sel]').forEach(x=>x.style.outline=''); b.style.outline='2px solid #111'; });
+    $('#x').onclick = closeOverlay;
+    $('#sendB').onclick = async ()=>{
+      const text = chosen || $('#free').value.trim();
+      if(!text){ toast('Scegli o scrivi una sfida', false); return; }
+      // cooldown per-sender
+      if(!canSend(kind, target)){ toast('Aspetta un attimo prima di inviare un altro brindisi 😉', false); return; }
+
+      const payload = { from: currentUser.nome, emoji: currentUser.emoji||null, tableFrom: currentUser.tavolo, text, ts: now(), kind };
+      if(kind==='table'){
+        await push(ref(db, `brindisi/table/${target}`), payload);
+      }else{
+        await push(ref(db, `brindisi/user/${keyify(target)}`), payload);
+      }
+      closeOverlay();
+      toast('Brindisi inviato!');
+    };
+  }
+
+  // Ascolto Brindisi destinati a me / al mio tavolo
+  function listenBrindisi(){
+    // a me
+    onChildAdded(ref(db, `brindisi/user/${keyify(currentUser.nome)}`),(snap)=>{
+      const b = snap.val();
+      // messaggio nella MIA chat privata (con mittente) per invito
+      const sys = {
+        type:'sys', action:'reply_link', from: b.from, fromKey:keyify(b.from),
+        title:`${b.from} ${b.emoji||''} ti propone un brindisi!`,
+        text:b.text
+      };
+      // apri/crea DM con mittente e mostra
+      openDMChat(b.from);
+      renderMsg(sys,'other');
+    });
+    // al mio tavolo
+    onChildAdded(ref(db, `brindisi/table/${currentUser.tavolo}`),(snap)=>{
+      const b = snap.val();
+      // mostralo in chat tavolo come mess. sistema con bottone “Rispondi in privato”
+      if(currentRoom?.type!=='table') openTableChat(currentUser.tavolo);
+      const sys = {
+        type:'sys', action:'reply_link', from: b.from, fromKey:keyify(b.from),
+        title:`Brindisi per Tavolo ${currentUser.tavolo} da ${b.from} ${b.emoji||''}`,
+        text:b.text
+      };
+      renderMsg(sys,'other');
+    });
+  }
+
+  /* ====================== Annunci (solo staff) ======================= */
+  function openAnnuncio(){
+    openOverlay(`
+      <div class="modal">
+        <h3>Nuovo annuncio (a tutti)</h3>
+        <textarea id="annTxt" rows="3" placeholder="Scrivi l’annuncio…"></textarea>
+        <div class="row" style="justify-content:flex-end;margin-top:10px">
+          <button class="btn ghost" id="x">Annulla</button>
+          <button class="btn primary" id="ok">Invia</button>
+        </div>
+      </div>
+    `);
+    $('#x').onclick = closeOverlay;
+    $('#ok').onclick = async ()=>{
+      const t = $('#annTxt').value.trim(); if(!t){ toast('Scrivi qualcosa', false); return; }
+      await push(ref(db,'annunci/all'), { text:t, ts:now(), by: currentUser.nome });
+      closeOverlay(); toast('Annuncio inviato!');
+    };
+  }
+
+  // Mostra annunci una sola volta per utente (localStorage)
+  (function listenAnnunci(){
+    onChildAdded(ref(db,'annunci/all'),(snap)=>{
+      const a = snap.val(); const seen = JSON.parse(localStorage.getItem('annSeen')||'[]');
+      if(seen.includes(snap.key)) return;
+      openOverlay(`
+        <div class="modal">
+          <h3>Annuncio</h3>
+          <p>${a.text}</p>
+          <div class="row" style="justify-content:flex-end"><button id="okAnn" class="btn primary">OK</button></div>
+        </div>
+      `);
+      $('#okAnn').onclick = ()=>{ closeOverlay(); localStorage.setItem('annSeen', JSON.stringify(seen.concat(snap.key))); };
+    });
+  })();
+
+  /* ====================== Start ======================= */
+  function boot(){
+    const saved = JSON.parse(localStorage.getItem('me')||'null');
+    if(saved){ currentUser = saved; afterLogin(); }
+  }
+  // persistenza semplice
+  window.addEventListener('beforeunload', ()=>{ if(currentUser) localStorage.setItem('me', JSON.stringify(currentUser)); });
+
+  boot();
+  listenBrindisi();
 </script>
 </body>
 </html>
