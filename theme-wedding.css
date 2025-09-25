@@ -154,15 +154,13 @@
 }
 
 .theme-wedding::after {
-  content: "";
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 280px;
-  height: 200px;
-  background: url("wedding-bottom-left.svg") no-repeat bottom left;
-  background-size: contain;
-  pointer-events: none;
-  opacity: 0.6;
+  content:"";
+  position:fixed;
+  bottom:0; left:0;
+  width:280px; height:200px;
+  background:url("wedding-bottom-left.svg") no-repeat bottom left;
+  background-size:contain;
+  pointer-events:none;
+  opacity:0.4;      /* più trasparente */
   z-index:-1;       /* resta dietro al contenuto */
 }
