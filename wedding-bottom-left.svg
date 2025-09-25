@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <!-- Rametti di eucalipto -->
+  <path d="M30 180 C60 140, 100 120, 140 80" stroke="#88a88c" stroke-width="5" fill="none"/>
+  <circle cx="60" cy="150" r="14" fill="#a3c9a8"/>
+  <circle cx="85" cy="125" r="12" fill="#b2d3b0"/>
+  <circle cx="110" cy="100" r="10" fill="#9cbf9c"/>
+
+  <!-- Fiore principale (Dalia) -->
+  <circle cx="70" cy="170" r="26" fill="#f7cbd0"/>
+  <circle cx="70" cy="170" r="18" fill="#fbe4e7"/>
+  <circle cx="70" cy="170" r="6" fill="#d9778a"/>
+
+  <!-- Camomilla -->
+  <circle cx="130" cy="150" r="10" fill="#fff"/>
+  <circle cx="130" cy="150" r="4" fill="#f4d35e"/>
+
+  <!-- Gypsophila (piccoli puntini bianchi) -->
+  <circle cx="95" cy="140" r="3" fill="#fff"/>
+  <circle cx="115" cy="160" r="3" fill="#fff"/>
+  <circle cx="125" cy="135" r="3" fill="#fff"/>
+</svg>
