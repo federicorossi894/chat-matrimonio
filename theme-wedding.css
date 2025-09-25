@@ -1,0 +1,154 @@
+/* ===== Wedding Theme – salvia/eucalipto + fiori pastello ===== */
+/* Palette */
+:root {
+  --wed-sage-0:#f4f7f4;   /* sfondo carta */
+  --wed-sage-1:#e9f0eb;   /* card bg */
+  --wed-sage-2:#dbe7df;   /* accenti soft */
+  --wed-sage-3:#9eb7aa;   /* bordi delicati */
+  --wed-ink:   #1b1f1c;   /* testo principale */
+  --wed-cream: #fffdfa;   /* panna */
+  --wed-blush: #f6e6ea;   /* rosa cipria */
+  --wed-cham:  #f7f2d7;   /* camomilla/giallino */
+  --wed-petal: #fdeff6;   /* pastello fiore */
+}
+
+/* Attiva solo quando body ha .theme-wedding */
+.theme-wedding {
+  /* carta leggermente “polverosa” + angoli fioriti */
+  --bg: var(--wed-sage-0);
+  --card: var(--wed-cream);
+  --text: var(--wed-ink);
+  --muted:#6b716e;
+  --soft: var(--wed-sage-1);
+  --chip: #eef2ef;
+  --pri:  #2d3a35;        /* bottone scuro elegante */
+  --priText:#fff;
+  --shadow: 0 10px 30px rgba(34,51,42,.10);
+
+  background:
+    radial-gradient(1200px 800px at -10% -10%, rgba(255,255,255,.35), transparent 60%),
+    radial-gradient(1200px 800px at 110% 110%, rgba(255,255,255,.35), transparent 60%),
+    var(--wed-sage-0);
+}
+
+/* testo/titoli un filo più “invito” */
+.theme-wedding h1,
+.theme-wedding h2 {
+  font-family: "Cormorant Garamond", ui-serif, Georgia, serif;
+  letter-spacing:.2px;
+  color: var(--wed-ink);
+}
+.theme-wedding h1 { font-weight:600 }
+.theme-wedding h2 { font-weight:500 }
+
+/* Cards più soffici */
+.theme-wedding .card,
+.theme-wedding .panel,
+.theme-wedding .dmList,
+.theme-wedding .sheet {
+  background: var(--card);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--wed-sage-2);
+}
+
+/* Tabs & icon buttons */
+.theme-wedding .tab { background: var(--soft); color: var(--wed-ink) }
+.theme-wedding .tab.active { background:#2d3a35; color:#fff }
+.theme-wedding .iconBtn { background: var(--soft); border:1px solid var(--wed-sage-2) }
+
+/* Bolle chat */
+.theme-wedding .bubble { 
+  background: #f7faf7; 
+  border: 1px solid var(--wed-sage-2);
+  border-radius: 18px;
+}
+.theme-wedding .msg.me .bubble {
+  background: #2f493f;          /* salvia profondo */
+  color: #fff;
+  border-color: #2f493f;
+}
+
+/* Messaggi immagine: leggero bordo */
+.theme-wedding .msgPhoto {
+  border-color: var(--wed-sage-2);
+  background:#fff;
+  border-radius:18px;
+}
+
+/* Avatar “fotografia incorniciata” */
+.theme-wedding .avatar {
+  border: 2px solid #fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,.05);
+  background: #d9e6dd;
+}
+
+/* Bottoni */
+.theme-wedding .btn.primary { 
+  background: var(--pri);
+  color: var(--priText);
+}
+.theme-wedding .btn.soft {
+  background: var(--soft);
+  border: 1px solid var(--wed-sage-2);
+}
+
+/* Hint/notice caldi */
+.theme-wedding .hint { 
+  background: linear-gradient(#fff, #fffdfa);
+  border: 1px solid #efe7c8;
+}
+
+/* ================== Cornici floreali ================== */
+/* Usiamo lo stesso SVG in alto-sx e in basso-dx ruotato */
+.theme-wedding .wrap {
+  position: relative;
+  isolation: isolate;
+}
+.theme-wedding .wrap::before,
+.theme-wedding .wrap::after {
+  content: "";
+  position: absolute;
+  width: 160px; height: 160px;
+  background: url("wedding-corner.svg") no-repeat center/contain;
+  opacity: .75;
+  pointer-events: none;
+  z-index: -1;
+  filter: drop-shadow(0 4px 10px rgba(32,48,40,.10));
+}
+.theme-wedding .wrap::before {
+  top: -8px; left: -8px;
+}
+.theme-wedding .wrap::after {
+  bottom: -8px; right: -8px;
+  transform: scaleX(-1) rotate(2deg);
+}
+
+/* Input & select con bordo salvia */
+.theme-wedding .field input,
+.theme-wedding .field select {
+  background:#fff;
+  border:1px solid var(--wed-sage-3);
+}
+
+/* Stato/emoji: card selezionata */
+.theme-wedding .statusRow.active {
+  outline-color:#2f493f;
+  background:#eef4f0;
+}
+
+/* Fab profilo più “pill” */
+.theme-wedding .fab {
+  background:#ffffffd9;
+  backdrop-filter: blur(6px);
+  border:1px solid var(--wed-sage-2);
+}
+
+/* Toast scuro elegante */
+.theme-wedding .toast { background:#2f493f }
+
+/* Piccola cornice sui riquadri scrollabili */
+.theme-wedding .msgList {
+  background: #fff;
+  border:1px solid var(--wed-sage-2);
+}
